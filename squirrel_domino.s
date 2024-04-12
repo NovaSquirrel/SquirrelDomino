@@ -31,13 +31,49 @@
 .segment "VECTORS"
   .addr nmi, reset, irq
 
+; -----------------------------------------------------------------------------
+PUZZLE_WIDTH = 8
+PUZZLE_HEIGHT = 16
+
+.enum PuzzleStates
+  INIT_GAME
+  INIT_PILL
+  FALL_PILL
+  CHECK_MATCH
+  GRAVITY
+  VICTORY
+  FAILURE
+.endenum
+
+.enum PuzzleGimmicks
+  CLASSIC
+  FREE_SWAP
+  DOUBLES
+  NO_RUSH
+  UNCONNECTED
+
+  GIMMICK_COUNT
+.endenum
+
+.enum PuzzleTiles
+  VIRUS
+  SINGLE
+  LEFT
+  RIGHT
+  BOTTOM
+  TOP
+  CLEARING
+.endenum
+
+; -----------------------------------------------------------------------------
 .include "memory.s"
 
-.segment "CODE"
-.include "borrowed.s"
 .code
+.include "misc.s"
+.include "menu.s"
 .include "puzzlegame.s"
-.code
+.include "puzzlelogic.s"
+; -----------------------------------------------------------------------------
 
 Reset:
 .proc reset
@@ -122,78 +158,6 @@ Palette:
   rti
 .endproc
 
-; Random number generator, consists of two LFSRs that get used together for a high period
-; http://codebase64.org/doku.php?id=base:two_very_fast_16bit_pseudo_random_generators_as_lfsr
-; output: A (random number)
-.proc huge_rand
-.proc rand64k
-  lda random1+1
-  asl
-  asl
-  eor random1+1
-  asl
-  eor random1+1
-  asl
-  asl
-  eor random1+1
-  asl
-  rol random1         ;shift this left, "random" bit comes from low
-  rol random1+1
-.endproc
-.proc rand32k
-  lda random2+1
-  asl
-  eor random2+1
-  asl
-  asl
-  ror random2         ;shift this right, random bit comes from high - nicer when eor with random1
-  rol random2+1
-.endproc
-  lda random1           ;mix up lowbytes of random1
-  eor random2           ;and random2 to combine both 
-  rts
-.endproc
-
-WaitVblank:
-.proc wait_vblank
-  lda retraces
-  loop:
-    cmp retraces
-    beq loop
-  rts
-.endproc
-
-; Writes a zero terminated string to the screen
-; (by Ross Archer)
-.proc PutStringImmediate
-    DPL = $02
-    DPH = $03
-    pla             ; Get the low part of "return" address
-                    ; (data start address)
-    sta DPL
-    pla 
-    sta DPH         ; Get the high part of "return" address
-                    ; (data start address)
-                    ; Note: actually we're pointing one short
-PSINB:
-    ldy #1
-    lda (DPL),y     ; Get the next string character
-    inc DPL         ; update the pointer
-    bne PSICHO      ; if not, we're pointing to next character
-    inc DPH         ; account for page crossing
-PSICHO:
-    ora #0          ; Set flags according to contents of accumulator
-                    ;    Accumulator
-    beq PSIX1       ; don't print the final NULL 
-    sta PPUDATA     ; write it out
-    jmp PSINB       ; back around
-PSIX1:
-    inc DPL
-    bne PSIX2
-    inc DPH         ; account for page crossing
-PSIX2:
-    jmp (DPL)       ; return to byte following final NULL
-.endproc
 
 ; Music
 .include "famitone/famitone2.s"
