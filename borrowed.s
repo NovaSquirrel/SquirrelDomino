@@ -1,18 +1,23 @@
-; Princess Engine
-; Copyright (C) 2014-2019 NovaSquirrel
+; Squirrel Domino
+; Implementation of expired U.S. Patent 5265888
 ;
-; This program is free software: you can redistribute it and/or
-; modify it under the terms of the GNU General Public License as
-; published by the Free Software Foundation; either version 3 of the
-; License, or (at your option) any later version.
-;
-; This program is distributed in the hope that it will be useful, but
-; WITHOUT ANY WARRANTY; without even the implied warranty of
-; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-; General Public License for more details.
-;
-; You should have received a copy of the GNU General Public License
-; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+; Copyright 2019, 2024 NovaSquirrel
+; 
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; 
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
 ;
 
 .proc ReseedRandomizer
@@ -82,35 +87,6 @@ ClearNameRightCustom = ClearNameRight::Custom
   rts
 .endproc
 
-.proc KeyRepeat
-  lda keydown
-  beq NoAutorepeat
-  cmp keylast
-  bne NoAutorepeat
-  inc PlaceBlockAutorepeat
-  lda PlaceBlockAutorepeat
-  cmp #12
-  bcc SkipNoAutorepeat
-
-  lda retraces
-  and #3
-  bne :+
-  lda keydown
-  and #KEY_LEFT|KEY_RIGHT|KEY_UP|KEY_DOWN
-  ora keynew
-  sta keynew
-:
-
-  ; Keep it from going up to 255 and resetting
-  dec PlaceBlockAutorepeat
-  bne SkipNoAutorepeat
-NoAutorepeat:
-  lda #0
-  sta PlaceBlockAutorepeat
-SkipNoAutorepeat:
-
-  rts
-.endproc
 
 WritePPURepeated16:
   ldx #16
@@ -129,19 +105,3 @@ WritePPURepeated16:
   .byt $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79
   .byt $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95, $96, $97, $98, $99
 .endproc
-
-LevelMap = $600
-
-.segment "ZEROPAGE"
-  MaxNumTileUpdates  = 4
-  TileUpdateA1:    .res MaxNumTileUpdates ; \ address
-  TileUpdateA2:    .res MaxNumTileUpdates ; /
-  TileUpdateT:     .res MaxNumTileUpdates ; new byte
-  PlaceBlockAutorepeat: .res 1 ; Autorepeat timer
-  TempVal:     .res 4
-  TempX:       .res 1 ; for saving the X register
-  TempY:       .res 1 ; for saving the Y register
-  OamPtr:      .res 1
-  PlayerDir:   .res 1
-  TouchTemp:   .res 10
-.code

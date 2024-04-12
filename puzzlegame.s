@@ -1,20 +1,25 @@
+; Squirrel Domino
 ; Implementation of expired U.S. Patent 5265888
-; Copyright (C) 2019 NovaSquirrel
 ;
-; This program is free software: you can redistribute it and/or
-; modify it under the terms of the GNU General Public License as
-; published by the Free Software Foundation; either version 3 of the
-; License, or (at your option) any later version.
+; Copyright 2019, 2024 NovaSquirrel
+; 
+; This software is provided 'as-is', without any express or implied
+; warranty.  In no event will the authors be held liable for any damages
+; arising from the use of this software.
+; 
+; Permission is granted to anyone to use this software for any purpose,
+; including commercial applications, and to alter it and redistribute it
+; freely, subject to the following restrictions:
+; 
+; 1. The origin of this software must not be misrepresented; you must not
+;    claim that you wrote the original software. If you use this software
+;    in a product, an acknowledgment in the product documentation would be
+;    appreciated but is not required.
+; 2. Altered source versions must be plainly marked as such, and must not be
+;    misrepresented as being the original software.
+; 3. This notice may not be removed or altered from any source distribution.
 ;
-; This program is distributed in the hope that it will be useful, but
-; WITHOUT ANY WARRANTY; without even the implied warranty of
-; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-; General Public License for more details.
-;
-; You should have received a copy of the GNU General Public License
-; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-PuzzleMap = LevelMap ; 128 bytes, 8*16
 PUZZLE_WIDTH = 8
 PUZZLE_HEIGHT = 16
 
@@ -77,66 +82,6 @@ PUZZLE_HEIGHT = 16
   TOP
   CLEARING
 .endenum
-
-.pushseg
-.segment "PUZRAM"
-
-PuzzleZeroStart:
-  PuzzleState:  .res 2    ; State each playfield is in
-  ; Experimental swap stuff
-  PuzzleSwapX: .res 2
-  PuzzleSwapY: .res 2
-  PuzzleSwapMode: .res 2  ; if players are in swap mode or not
-
-  ; Send garbage
-  PuzzleMatchesMade: .res 2 ; matches made between dropping each piece
-  PuzzleMatchColor:  .res 2*4 ; first player's four colors, then second player's
-
-  ; Receive garbage
-  PuzzleGarbageCount: .res 2
-  PuzzleGarbageColor: .res 2*4
-  LockoutSoftDrop:    .res 2 ; don't allow soft drop until you press down again
-PuzzleZeroEnd:
-
-  PuzzleX: .res 2
-  PuzzleY: .res 2
-  PuzzleFallTimer: .res 2 ; Time until the piece falls down one row
-  PuzzleDir: .res 2       ; Direction
-  PuzzleColor1: .res 2
-  PuzzleColor2: .res 2
-  PuzzleNextColor1: .res 2
-  PuzzleNextColor2: .res 2
-
-  ; Low, medium or high
-  PuzzleSpeed:  .res 2         ; ranges 0-2. pills
-  PuzzleGravitySpeed: .res 2   ; ranges 0-2, gravity
-
-  VirusLevel:   .res 2    ; Number of viruses to clear, in this version
-  PuzzleRedraw: .res 2    ; Redraw entire grid
-
-  PuzzleVersus: .res 1    ; If nonzero, versus mode
-  PuzzleGimmick: .res 1   ; gimmick selected
-  PuzzleTheme:  .res 1    ; theme picked
-
-  PuzzlePlayfieldBase: .res 1 ; 0 or 128 for player 1 or 2
-  PuzzleTileBase:      .res 1 ; $80, $a0, $c0, or $e0
-
-  PuzzleXSpriteOffset: .res 2 ; Distance to add to X for player 1 and 2's pills and next piece
-  PPU_UpdateLo:      .res 2   ; Low byte of a PPU update for pill placement
-  PPU_UpdateHi:      .res 2   ; High update of a PPU update for pill placement
-  Player2AutoRepeat: .res 1
-
-  PuzzleMusicChoice: .res 1      ; Which music is picked
-
-; Randomizer state:
-  PUZZLE_OUTCOMES = 9
-  PUZZLE_RANDBUF_SIZE = PUZZLE_OUTCOMES * 3
-  PUZZLE_PLAYERS = 2
-
-  PuzzleRandBuf: .res PUZZLE_PLAYERS * PUZZLE_RANDBUF_SIZE
-  PuzzleRandPos: .res PUZZLE_PLAYERS
-.popseg
-
 
 .proc PuzzleRandomColor
   ; Random number from 0 to 2
@@ -373,8 +318,8 @@ Reshow:
 
   PositionXY 0, 3, 22
   jsr PutStringImmediate
-;  .byt "Guide ",$82,$93," to make lines of",0
-  .byt "Guide ",$aa,$ab," to make lines of",0
+  .byt "Guide ",$82,$93," to make lines of",0
+;  .byt "Guide ",$aa,$ab," to make lines of",0
 
   PositionXY 0, 3, 23
   jsr PutStringImmediate
@@ -489,8 +434,10 @@ Loop:
   jsr huge_rand
 
   jsr PuzzleReadJoy
+  ldx #0
   jsr KeyRepeat
-  jsr KeyRepeatP2
+  inx
+  jsr KeyRepeat
 
   jsr ClearOAM
   ldx #0
@@ -561,7 +508,7 @@ ShiftCursorY:
   rts
 
 RunMenu:
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_UP
   beq :+
     dec CursorY,x
@@ -570,7 +517,7 @@ RunMenu:
       sta CursorY,x
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_DOWN
   beq :+
     inc CursorY,x
@@ -581,7 +528,7 @@ RunMenu:
       sta CursorY,x
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_LEFT
   beq @NotLeft
     ldy CursorY,x
@@ -650,7 +597,7 @@ RunMenu:
     sta PuzzleMusicChoice
   @NotLeft:
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_RIGHT
   jeq @NotRight
     ldy CursorY,x
@@ -767,7 +714,7 @@ PuzzleGimmickNames:
 
 PuzzleThemeNames:
   .byt "Minimal "
-  .byt "Contrast"
+  .byt "Shapes  "
   .byt "Squirrel"
 
 PuzzleMusicNames:
@@ -1058,8 +1005,10 @@ Loop:
   ; -----------------------------------
 
   jsr PuzzleReadJoy
+  ldx #0
   jsr KeyRepeat
-  jsr KeyRepeatP2
+  inx
+  jsr KeyRepeat
   jsr ClearOAM
 
   ldx #0
@@ -1569,7 +1518,7 @@ GhostY = TouchTemp + 4
   ; Allow moving horizontally
   ; ---------------
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_LEFT
   beq NotLeft
     lda PuzzleX,x
@@ -1588,7 +1537,7 @@ GhostY = TouchTemp + 4
     inc SecondX
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_RIGHT
   beq NotRight
     inc PuzzleX,x
@@ -2055,7 +2004,7 @@ PuzzleGridReadSecond:
   lda #24
   sta FallPill::GhostY
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_LEFT
   beq :+
     lda PuzzleSwapX,x
@@ -2063,7 +2012,7 @@ PuzzleGridReadSecond:
       dec PuzzleSwapX,x
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_RIGHT
   beq :+
     lda PuzzleSwapX,x
@@ -2072,7 +2021,7 @@ PuzzleGridReadSecond:
       inc PuzzleSwapX,x
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_UP
   beq :+
     lda PuzzleSwapY,x
@@ -2080,7 +2029,7 @@ PuzzleGridReadSecond:
       dec PuzzleSwapY,x
   :
 
-  lda keynew,x
+  lda key_new_or_repeat,x
   and #KEY_DOWN
   beq :+
     lda PuzzleSwapY,x
@@ -3107,32 +3056,34 @@ CalculateTileNum:
   rts
 .endproc
 
-; Supplements KeyRepeat
-.proc KeyRepeatP2
-  lda keydown+1
+.proc KeyRepeat
+  lda keynew,x
+  sta key_new_or_repeat,x
+
+  lda keydown,x
   beq NoAutorepeat
-  cmp keylast+1
+  cmp keylast,x
   bne NoAutorepeat
-  inc Player2AutoRepeat
-  lda Player2AutoRepeat
+  inc KeyRepeatTimer,x
+  lda KeyRepeatTimer,x
   cmp #12
   bcc SkipNoAutorepeat
 
   lda retraces
   and #3
   bne :+
-  lda keydown+1
+  lda keydown
   and #KEY_LEFT|KEY_RIGHT|KEY_UP|KEY_DOWN
-  ora keynew+1
-  sta keynew+1
+  ora key_new_or_repeat,x
+  sta key_new_or_repeat,x
 :
 
   ; Keep it from going up to 255 and resetting
-  dec Player2AutoRepeat
+  dec KeyRepeatTimer,x
   bne SkipNoAutorepeat
 NoAutorepeat:
   lda #0
-  sta Player2AutoRepeat
+  sta KeyRepeatTimer,x
 SkipNoAutorepeat:
   rts
 .endproc
