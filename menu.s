@@ -20,21 +20,319 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
 
+.proc TitleScreen
+  CursorY = TitleCursorY
+
+  lda #' '
+  jsr ClearNameCustom
+  jsr ClearOAM
+  lda #2
+  sta OAM_DMA
+
+  PositionXY 0, 6, 4
+  jsr PutStringImmediate
+  .byt "- Squirrel Domino -",0
+
+  ; ---------------------------------------------
+  ; Menu border
+  ; Top
+  PositionXY 0, 7, 16
+  lda #$98
+  sta PPUDATA
+  lda #$99
+  ldx #16
+  jsr WritePPURepeated
+  lda #$9a
+  sta PPUDATA
+  ; Bottom
+  PositionXY 0, 7, 28
+  lda #$9d
+  sta PPUDATA
+  lda #$9e
+  ldx #16
+  jsr WritePPURepeated
+  lda #$9f
+  sta PPUDATA
+
+  ; Make sides
+  lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_DOWN
+  sta PPUCTRL
+  PositionXY 0, 7, 17
+  lda #$9b
+  ldx #11
+  jsr WritePPURepeated
+  PositionXY 0, 24, 17
+  lda #$9c
+  ldx #11
+  jsr WritePPURepeated
+  lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
+  sta PPUCTRL
+  ; ---------------------------------------------
+  PositionXY 0, 11, 18
+  jsr PutStringImmediate
+  .byt "Solo mode",0
+
+  PositionXY 0, 11, 20
+  jsr PutStringImmediate
+  .byt "Versus mode",0
+
+  PositionXY 0, 11, 22
+  jsr PutStringImmediate
+  .byt "How to play",0
+
+  PositionXY 0, 11, 24
+  jsr PutStringImmediate
+  .byt "Credits",0
+
+  PositionXY 0, 11, 26
+  jsr PutStringImmediate
+  .byt "Quit",0
+  ; ---------------------------------------------
+
+  jsr WaitVblank
+  lda #BG_ON|OBJ_ON
+  sta PPUMASK
+  lda #0
+  sta PPUSCROLL
+  sta PPUSCROLL
+TitleLoop:
+  lda retraces
+  lsr
+  and #15
+  tax
+  lda BounceTable,x
+  add #9*8-2
+  sta OAM_XPOS
+  lda CursorY
+  asl
+  asl
+  asl
+  asl
+  adc #18*8-1
+  sta OAM_YPOS
+  lda #1
+  sta OAM_TILE
+  lda #OAM_COLOR_0
+  sta OAM_ATTR
+
+  jsr WaitVblank
+  lda #2
+  sta OAM_DMA
+
+  jsr PuzzleReadJoy
+  ldx #0
+  jsr KeyRepeat
+
+  lda key_new_or_repeat
+  and #KEY_UP
+  beq :+
+    dec CursorY
+    bpl :+
+      lda #4
+      sta CursorY
+  :
+
+  lda key_new_or_repeat
+  and #KEY_DOWN
+  beq :+
+    inc CursorY
+    lda CursorY
+    cmp #5
+    bne :+
+      lda #0
+      sta CursorY
+  :
+
+  lda keynew
+  and #KEY_START|KEY_A
+  beq :+
+    lda CursorY
+    asl
+    tax
+    lda OptionTable+1,x
+    pha
+    lda OptionTable+0,x
+    pha
+    rts
+  :
+
+  jmp TitleLoop
+
+BounceTable:
+  .byt 1, 2, 3, 4
+  .byt 5, 5, 5, 5
+  .byt 4, 3, 2, 1
+  .byt 0, 0, 0, 0
+
+OptionTable:
+.raddr OptionSolo
+.raddr OptionVersus
+.raddr OptionHowToPlay
+.raddr OptionCredits
+.raddr OptionQuit
+
+OptionSolo:
+  lda #0
+  sta PuzzleVersus
+  jmp PuzzleGameMenu
+OptionVersus:
+  lda #128
+  sta PuzzleVersus
+  jmp PuzzleGameMenu
+
+OptionQuit:
+  jmp ($FFFC)
+.endproc
+
+.proc OptionHowToPlay
+  jsr WaitVblank
+  lda #0
+  sta PPUMASK
+  lda #2
+  sta OAM_DMA
+
+  lda #' '
+  jsr ClearNameCustom
+  jsr ClearOAM
+
+  PositionXY 0, 6, 4
+  jsr PutStringImmediate
+  .byt "--- How to play! ---",0
+
+  PositionXY 0, 3, 6
+  jsr PutStringImmediate
+  .byt "Guide ",$82,$93," to make lines of",0
+
+  PositionXY 0, 3, 8
+  jsr PutStringImmediate
+  .byt "4 or more. Clear out all ",$88,0
+
+  PositionXY 0, 3, 10
+  jsr PutStringImmediate
+  .byt "to win!",0
+
+  PositionXY 0, 3, 14
+  jsr PutStringImmediate
+  .byt "In versus mode it's a race",0
+
+  PositionXY 0, 3, 16
+  jsr PutStringImmediate
+  .byt "against the other player to",0
+
+  PositionXY 0, 3, 18
+  jsr PutStringImmediate
+  .byt "clear all ",$88," first!",0
+
+  PositionXY 0, 5, 22
+  jsr PutStringImmediate
+  .byt "+: Move    A/B: Rotate",0
+
+  PositionXY 0, 5, 26
+  jsr PutStringImmediate
+  .byt "Press Start to exit",0
+
+  lda #0
+  sta PPUSCROLL
+  sta PPUSCROLL
+
+WaitForExit:
+  jsr WaitVblank
+  lda #BG_ON
+  sta PPUMASK
+  jsr PuzzleReadJoy
+  lda keynew
+  and #KEY_A|KEY_START
+  beq WaitForExit
+
+  jsr WaitVblank
+  lda #0
+  sta PPUMASK
+  jmp TitleScreen
+.endproc
+
+.proc OptionCredits
+  jsr WaitVblank
+  lda #0
+  sta PPUMASK
+  lda #2
+  sta OAM_DMA
+
+  lda #' '
+  jsr ClearNameCustom
+  jsr ClearOAM
+
+  PositionXY 0, 6, 4
+  jsr PutStringImmediate
+  .byt "----- Credits! -----",0
+
+  PositionXY 0, 3, 6
+  jsr PutStringImmediate
+  .byt "Code & art by NovaSquirrel:",0
+  PositionXY 0, 3, 8
+  jsr PutStringImmediate
+  .byt "https://novasquirrel.com/",0
+
+  PositionXY 0, 3, 12
+  jsr PutStringImmediate
+  .byt "Music by maple syrup:",0
+  PositionXY 0, 3, 14
+  jsr PutStringImmediate
+  .byt "https://maple.pet/",0
+  PositionXY 0, 3, 16
+  jsr PutStringImmediate
+  .byt "Engine: FamiTone2 by Shiru",0
+
+  PositionXY 0, 3, 20
+  jsr PutStringImmediate
+  .byt "Font by PinoBatch:",0
+  PositionXY 0, 3, 22
+  jsr PutStringImmediate
+  .byt "https://pineight.com/",0
+
+  PositionXY 0, 5, 26
+  jsr PutStringImmediate
+  .byt "Press Start to exit",0
+
+  lda #0
+  sta PPUSCROLL
+  sta PPUSCROLL
+
+WaitForExit:
+  jsr WaitVblank
+  lda #BG_ON
+  sta PPUMASK
+  jsr PuzzleReadJoy
+  lda keynew
+  and #KEY_A|KEY_START
+  beq WaitForExit
+
+  jsr WaitVblank
+  lda #0
+  sta PPUMASK
+  jmp TitleScreen
+.endproc
+
 .proc PuzzleGameMenu
   CursorY = TempVal ; array of 2
+
+  jsr WaitVblank
+  lda #0
+  sta PPUMASK
 
   jsr ReseedRandomizer
 
   lda #2
   sta PuzzleMusicChoice
-  lda #4 ; squirrel, light
-  sta PuzzleTheme
+  lda #2
+  sta PuzzlePieceTheme
+  lda #0
+  sta PuzzlePieceColor
+  sta PuzzleBGTheme
 
   ; Clear RAM
   ldx #0
   tax
-: sta $700,x
-  sta PuzzleMap,x
+: sta PuzzleMap,x
   inx
   bne :-
 
@@ -48,6 +346,8 @@
   sta PuzzleGravitySpeed+1
 
 Reshow:
+  lda #0
+
   jsr PuzzleMusicInit
 
   lda PuzzleMusicChoice
@@ -68,11 +368,11 @@ Reshow:
   ldx #0
   stx PPUMASK
 
-  ; Also make sure background is white
+  ; Reset the background color to a light blue
   lda #$3f
   sta PPUADDR
   stx PPUADDR ; X is zero still from above
-  lda #$30
+  lda #$31
   sta PPUDATA
 
 
@@ -92,7 +392,7 @@ Reshow:
   lda #$9a
   sta PPUDATA
   ; Bottom
-  PositionXY 0, 4, 20
+  PositionXY 0, 4, 25
   lda #$9d
   sta PPUDATA
   lda #$9e
@@ -106,20 +406,17 @@ Reshow:
   sta PPUCTRL
   PositionXY 0, 4, 7
   lda #$9b
-  ldx #13
+  ldx #18
   jsr WritePPURepeated
   PositionXY 0, 26, 7
   lda #$9c
-  ldx #13
+  ldx #18
   jsr WritePPURepeated
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
   sta PPUCTRL
 
 
   ; Draw the menu options
-;  PositionXY 0, 9, 4
-;  jsr PutStringImmediate
-;  .byt "- Capsules -",0
   PositionXY 0, 6, 4
   jsr PutStringImmediate
   .byt "- Squirrel Domino -",0
@@ -148,36 +445,29 @@ Reshow:
 
   PositionXY 0, 6, 17
   jsr PutStringImmediate
-  .byt "Theme: Minimal",0
+  .byt "Piece: ",0
 
   PositionXY 0, 6, 19
+  jsr PutStringImmediate
+  .byt "Color: ",0
+
+  PositionXY 0, 6, 21
+  jsr PutStringImmediate
+  .byt "Theme: ",0
+
+  PositionXY 0, 6, 23
   jsr PutStringImmediate
   .byt "Sound: ",0
 
   ; -----------------------------------
 
-  PositionXY 0, 3, 22
-  jsr PutStringImmediate
-  .byt "Guide ",$82,$93," to make lines of",0
-;  .byt "Guide ",$aa,$ab," to make lines of",0
-
-  PositionXY 0, 3, 23
-  jsr PutStringImmediate
-  .byt "4 or more. Clear out all ",$88,0
-
-  PositionXY 0, 3, 24
-  jsr PutStringImmediate
-  .byt "to win!",0
-
-  PositionXY 0, 5, 26
-  jsr PutStringImmediate
-  .byt "+: Move    A/B: Rotate",0
-
   lda #0
   sta PPUSCROLL
   sta PPUSCROLL
-  sta CursorY
+  sta CursorY+0
   sta CursorY+1
+  sta PlayerReady+0
+  sta PlayerReady+1
 
 Loop:
   jsr WaitVblank
@@ -185,6 +475,15 @@ Loop:
   sta PPUMASK
   lda #2
   sta OAM_DMA
+
+  ; -------------------------------------------------------
+
+  ; Piece colors
+  lda #$3f
+  sta PPUADDR
+  lda #$1d
+  sta PPUADDR
+  jsr WritePieceColors
 
   ; Print the counts and speeds chosen
   PositionXY 0, 16, 11
@@ -225,17 +524,37 @@ Loop:
   dey
   bne :-
 
-  ; Print theme name
+  ; Print piece theme name
   ; always 8 characters
   PositionXY 0, 13, 17
-  lda PuzzleTheme
-  lsr
+  lda PuzzlePieceTheme
   asl
   asl
   asl
   tax
   ldy #8
-: lda PuzzleThemeNames,x
+: lda PuzzlePieceThemeNames,x
+  sta PPUDATA
+  inx
+  dey
+  bne :-
+
+  ; Print piece color number
+  PositionXY 0, 13, 19
+  lda PuzzlePieceColor
+  add #'1'
+  sta PPUDATA
+
+  ; Print theme name
+  ; always 8 characters
+  PositionXY 0, 13, 21
+  lda PuzzleBGTheme
+  asl
+  asl
+  asl
+  tax
+  ldy #8
+: lda PuzzleBGThemeNames,x
   sta PPUDATA
   inx
   dey
@@ -243,7 +562,7 @@ Loop:
 
   ; Draw light or dark
   ldy #$91 ; light
-  lda PuzzleTheme
+  lda PuzzleBGTheme
   lsr
   bcc :+
     ldy #$81 ; dark
@@ -251,7 +570,7 @@ Loop:
   sty PPUDATA
 
   ; Music names
-  PositionXY 0, 13, 19
+  PositionXY 0, 13, 23
   lda PuzzleMusicChoice
   asl
   asl
@@ -267,6 +586,8 @@ Loop:
   lda #0
   sta PPUSCROLL
   sta PPUSCROLL
+
+  ; -------------------------------------------------------
 
   jsr PuzzleReadJoy
   ldx #0
@@ -288,7 +609,12 @@ Loop:
 
   lda keynew
   and #KEY_B
-  jne Reset
+  beq :+
+    jsr WaitVblank
+    lda #0
+    sta PPUMASK
+    jmp TitleScreen
+  :
 
   ; Draw the next piece
   ldy OamPtr
@@ -329,6 +655,38 @@ Loop:
   :
   sta OAM_XPOS+8,y
 
+  ; ---------------------------------------------
+  ; Draw the piece preview
+  ldx PuzzlePieceTheme
+  lda PieceThemeTileBases,x
+  sta 0
+
+  lda #$80 | PuzzleTiles::SINGLE
+  ora 0
+  sta OAM_TILE+12+(4*0),y
+  lda #$88 | PuzzleTiles::SINGLE
+  ora 0
+  sta OAM_TILE+12+(4*1),y
+  lda #$90 | PuzzleTiles::SINGLE
+  ora 0
+  sta OAM_TILE+12+(4*2),y
+
+  lda #OAM_COLOR_3
+  sta OAM_ATTR+12+(4*0),y
+  sta OAM_ATTR+12+(4*1),y
+  sta OAM_ATTR+12+(4*2),y
+
+  lda #19*8-1
+  sta OAM_YPOS+12+(4*0),y
+  sta OAM_YPOS+12+(4*1),y
+  sta OAM_YPOS+12+(4*2),y
+  lda #15*8
+  sta OAM_XPOS+12+(4*0),y
+  lda #17*8
+  sta OAM_XPOS+12+(4*1),y
+  lda #19*8
+  sta OAM_XPOS+12+(4*2),y
+
   tya
   add #12
   sta OamPtr
@@ -349,7 +707,7 @@ RunMenu:
   beq :+
     dec CursorY,x
     bpl :+
-      lda #6
+      lda #8
       sta CursorY,x
   :
 
@@ -358,7 +716,7 @@ RunMenu:
   beq :+
     inc CursorY,x
     lda CursorY,x
-    cmp #7
+    cmp #9
     bne :+
       lda #0
       sta CursorY,x
@@ -418,14 +776,34 @@ RunMenu:
     @NotGravityL:
 
     dey
-    bne @NotThemeL
-      dec PuzzleTheme
+    bne @NotPieceThemeL
+      dec PuzzlePieceTheme
       bpl :+
-        lda #5
-        sta PuzzleTheme
+        lda #2
+        sta PuzzlePieceTheme
       :
       jmp @NotLeft
-    @NotThemeL:
+    @NotPieceThemeL:
+
+    dey
+    bne @NotPieceColorL
+      dec PuzzlePieceColor
+      bpl :+
+        lda #3
+        sta PuzzlePieceColor
+      :
+      jmp @NotLeft
+    @NotPieceColorL:
+
+    dey
+    bne @NotBGThemeL
+      dec PuzzleBGTheme
+      bpl :+
+        lda #3
+        sta PuzzleBGTheme
+      :
+      jmp @NotLeft
+    @NotBGThemeL:
 
     dec PuzzleMusicChoice
     lda PuzzleMusicChoice
@@ -496,16 +874,40 @@ RunMenu:
     @NotGravityR:
 
     dey
-    bne @NotThemeR
-      inc PuzzleTheme
-      lda PuzzleTheme
-      cmp #6
-      bcc :+
+    bne @NotPieceThemeR
+      inc PuzzlePieceTheme
+      lda PuzzlePieceTheme
+      cmp #3
+      bne :+
         lda #0
-        sta PuzzleTheme
+        sta PuzzlePieceTheme
       :
       jmp @NotRight
-    @NotThemeR:
+    @NotPieceThemeR:
+
+    dey
+    bne @NotPieceColorR
+      inc PuzzlePieceColor
+      lda PuzzlePieceColor
+      cmp #4
+      bne :+
+        lda #0
+        sta PuzzlePieceColor
+      :
+      jmp @NotRight
+    @NotPieceColorR:
+
+    dey
+    bne @NotBGThemeR
+      inc PuzzleBGTheme
+      lda PuzzleBGTheme
+      cmp #4
+      bne :+
+        lda #0
+        sta PuzzleBGTheme
+      :
+      jmp @NotRight
+    @NotBGThemeR:
 
     inc PuzzleMusicChoice
     lda PuzzleMusicChoice
@@ -548,10 +950,16 @@ PuzzleGimmickNames:
   .byt "No Rush "
   .byt "Loose   "
 
-PuzzleThemeNames:
+PuzzlePieceThemeNames:
   .byt "Minimal "
   .byt "Shapes  "
   .byt "Squirrel"
+
+PuzzleBGThemeNames:
+  .byt "Paws    "
+  .byt "Paws    "
+  .byt "Paws    "
+  .byt "Paws    "
 
 PuzzleMusicNames:
   .byt "Mute "

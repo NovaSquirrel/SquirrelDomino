@@ -105,15 +105,6 @@ Reset:
 
   lda #0
   sta SND_CHN
-	
-  ldx #1
-  stx random1
-  inx
-  stx random1+1
-  inx
-  stx random2
-  inx
-  stx random2+1
 
   lda #0
   sta PPUMASK
@@ -134,20 +125,32 @@ Reset:
   cpx #32
   bne :-
 
-  jmp PuzzleGameMenu
+  jmp TitleScreen
 .endproc
 
 Palette:
-  .byt $30, $0f, $00, $10
-  .byt $30, $0a, $02, $05
+  .byt $31, $0f, $00, $10
+  .byt $31, $0a, $02, $05
 ;  .byt $30, $3a, $32, $35
-  .byt $30, $0f, $00, $10
-  .byt $30, $0f, $00, $10
+  .byt $31, $0f, $00, $10
+  .byt $31, $0f, $00, $10
 
-  .byt $30, $12, $2a, $30
-  .byt $30, $2d, $3d, $30
-  .byt $30, $0f, $00, $10
-  .byt $30, $0f, $00, $10
+  .byt $31, $12, $2a, $30
+  .byt $31, $2d, $3d, $30
+  .byt $31, $0f, $00, $10
+  .byt $31, $0f, $00, $10
+
+
+; Palette layout is:
+;  BG 0: Text, menu and borders
+;  BG 1: Background decorations
+;  BG 2: Background decorations
+;  BG 3: Game playfield
+;
+;  Sprite 0: Cursor
+;  Sprite 1: Unused
+;  Sprite 2: Unused
+;  Sprite 3: Game playfield
 
 .proc nmi
   inc retraces

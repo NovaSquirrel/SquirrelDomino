@@ -35,6 +35,8 @@ NUM_PLAYERS = 2
   retraces: .res 1
   KeyRepeatTimer: .res NUM_PLAYERS
 
+  TitleCursorY: .res 1
+  PlayerReady: .res NUM_PLAYERS
 PuzzleZeroStart:
   PuzzleState:    .res NUM_PLAYERS ; State each playfield is in
   ; For the experimental swap mode
@@ -68,9 +70,11 @@ PuzzleZeroEnd:
   VirusLevel:    .res NUM_PLAYERS ; Number of viruses to clear, in this version
   PuzzleRedraw:  .res NUM_PLAYERS ; Redraw entire grid
 
-  PuzzleVersus:  .res 1    ; If nonzero, versus mode
+  PuzzleVersus:  .res 1    ; If negative, versus mode
   PuzzleGimmick: .res 1    ; Gimmick selected
-  PuzzleTheme:   .res 1    ; Theme picked
+  PuzzlePieceTheme: .res 1 ; Theme picked
+  PuzzlePieceColor: .res 1
+  PuzzleBGTheme: .res 1
 
   PuzzlePlayfieldBase: .res 1 ; 0 or 128 for player 1 or 2
   PuzzleTileBase:      .res 1 ; $80, $a0, $c0, or $e0

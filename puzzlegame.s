@@ -64,34 +64,33 @@
   stx PPUADDR
   lda #$0d
   sta PPUADDR
-  jsr WriteColors
+  jsr WritePieceColors
   stx PPUADDR
   lda #$1d
   sta PPUADDR
-  jsr WriteColors
+  jsr WritePieceColors
+
   ; Change background color
   stx PPUADDR
   lda #0
   sta PPUADDR
-  lda PuzzleTheme
+  lda PuzzleBGTheme
   and #1
   tay
-  lda ThemeBackgroundColors,y
+  lda BGThemeBackgroundColors,y
   sta PPUDATA
 
   ; Do the extra colors too
   stx PPUADDR
   lda #5
   sta PPUADDR
-  lda ThemeExtraColor1,y
+  lda BGThemeExtraColor1,y
   sta PPUDATA
-  lda ThemeExtraColor2,y
+  lda BGThemeExtraColor2,y
   sta PPUDATA
 
-  lda PuzzleTheme
-  lsr
-  tay
-  lda ThemeTileBases,y
+  ldy PuzzlePieceTheme
+  lda PieceThemeTileBases,y
   sta PuzzleTileBase
 
   ; Erase first tile
@@ -324,7 +323,7 @@ Loop:
     sta PuzzleRedraw+1
   :
 
-  lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
+  lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_1000 | OBJ_1000 | VRAM_RIGHT
   sta PPUCTRL
   lda #0
   sta PPUSCROLL
@@ -421,22 +420,30 @@ WriteZeroRepeated6:
   ldx #6
   jmp WritePPURepeated
 
-WriteColors:
-  lda #$16
+::WritePieceColors:
+  ldy PuzzlePieceColor
+  lda PieceColor1,y
   sta PPUDATA
-  lda #$2a
+  lda PieceColor2,y
   sta PPUDATA
-  lda #$22
+  lda PieceColor3,y
   sta PPUDATA
   rts
-ThemeBackgroundColors:
+PieceColor1:
+  .byt $16, $16, $25, $15
+PieceColor2:
+  .byt $2a, $28, $37, $29
+PieceColor3:
+  .byt $22, $13, $2c, $2c
+
+BGThemeBackgroundColors:
   .byt $30, $0f
-ThemeExtraColor1:
+BGThemeExtraColor1:
   .byt $3a, $0a
-ThemeExtraColor2:
+BGThemeExtraColor2:
   .byt $3b, $01
 
-ThemeTileBases:
+::PieceThemeTileBases:
   .byt $80, $a0, $c0
 .endproc
 
