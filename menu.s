@@ -437,11 +437,12 @@ Reshow:
 
   PositionXY 0, 12, 6
   lda PuzzleVersus
-  bmi :+
-    jsr PutStringImmediate
-    .byt " Solo",0
-    jmp :++
-  :
+  bpl :+
+;  bmi :+
+;    jsr PutStringImmediate
+;    .byt " Solo",0
+;    jmp :++
+;  :
     jsr PutStringImmediate
     .byt "Versus!",0
   :
