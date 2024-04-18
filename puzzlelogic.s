@@ -345,10 +345,18 @@ StateLo:
   inc PuzzleState,x
 
   ldy PuzzleSpeed,x
-;  lda PuzzleFallSpeeds,y
   ; Give extra time after the pill appears
   lda #50
   sta PuzzleFallTimer,x
+  ; And even more time if it's the first pill and it's versus mode
+  lda PuzzleVersus
+  bpl :+
+  lda PlayerReady,x
+  beq :+
+    asl PuzzleFallTimer,x
+    lda #0
+    sta PlayerReady,x
+  :
 
   ; If there's a tile in either of the two opening tiles
   ; then you've lost.

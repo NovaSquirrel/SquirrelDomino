@@ -20,17 +20,6 @@
 ; 3. This notice may not be removed or altered from any source distribution.
 ;
 
-.enum PuzzleSFX
-  ROTATE
-  LAND
-  CLEAR
-  CLEAR2
-  CLEAR3
-  GARBAGE
-  WIN
-  FAIL
-.endenum
-
 .proc PuzzlePlaySFX
   stx TempX
   sty TempY
@@ -371,7 +360,9 @@ Loop:
     lda keydown
     and #KEY_SELECT
     jne PuzzleGameMenu::Reshow
-    lda #BG_ON|OBJ_ON|LIGHTGRAY
+    lda #VBLANK_NMI | NT_2800 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
+    sta PPUCTRL
+    lda #BG_ON
     sta PPUMASK
 
     ; Debounce
@@ -402,6 +393,8 @@ Loop:
     lda #0
     jsr FamiToneMusicPause
 
+    lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_1000 | OBJ_1000 | VRAM_RIGHT
+    sta PPUCTRL
     lda #BG_ON|OBJ_ON
     sta PPUMASK
   NoPause:

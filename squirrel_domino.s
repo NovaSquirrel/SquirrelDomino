@@ -65,6 +65,17 @@ PUZZLE_HEIGHT = 16
   CLEARING
 .endenum
 
+.enum PuzzleSFX
+  ROTATE
+  LAND
+  CLEAR
+  CLEAR2
+  CLEAR3
+  GARBAGE
+  WIN
+  FAIL
+.endenum
+
 ; -----------------------------------------------------------------------------
 .include "memory.s"
 

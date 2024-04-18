@@ -25,7 +25,19 @@
 
   lda #' '
   jsr ClearNameCustom
+  lda #' '
+  jsr ClearNameRightCustom
+
+  ; Set up a pause screen on the other tilemap so I can scroll to it at any time
+  PositionXY 2, 16-6/2, 13
+  jsr PutStringImmediate
+  .byt "PAUSED",0
+  PositionXY 2, 16-22/2, 16
+  jsr PutStringImmediate
+  .byt "Press Start to unpause",0
+
   jsr ClearOAM
+
   lda #2
   sta OAM_DMA
 
@@ -158,7 +170,7 @@ TitleLoop:
 
   jmp TitleLoop
 
-BounceTable:
+::BounceTable:
   .byt 1, 2, 3, 4
   .byt 5, 5, 5, 5
   .byt 4, 3, 2, 1
@@ -383,7 +395,7 @@ Reshow:
 
   ; Menu border
   ; Top
-  PositionXY 0, 4, 6
+  PositionXY 0, 4, 7
   lda #$98
   sta PPUDATA
   lda #$99
@@ -404,13 +416,13 @@ Reshow:
   ; Make sides
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_DOWN
   sta PPUCTRL
-  PositionXY 0, 4, 7
+  PositionXY 0, 4, 8
   lda #$9b
-  ldx #18
+  ldx #17
   jsr WritePPURepeated
-  PositionXY 0, 26, 7
+  PositionXY 0, 26, 8
   lda #$9c
-  ldx #18
+  ldx #17
   jsr WritePPURepeated
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
   sta PPUCTRL
@@ -423,9 +435,16 @@ Reshow:
 
   ; -----------------------------------
 
-  PositionXY 0, 6, 7
-  jsr PutStringImmediate
-  .byt " Mode: Solo  Versus",0
+  PositionXY 0, 12, 6
+  lda PuzzleVersus
+  bmi :+
+    jsr PutStringImmediate
+    .byt " Solo",0
+    jmp :++
+  :
+    jsr PutStringImmediate
+    .byt "Versus!",0
+  :
 
   PositionXY 0, 6, 9
   jsr PutStringImmediate
@@ -596,16 +615,74 @@ Loop:
   inx
   jsr KeyRepeat
 
+  bit PuzzleVersus ; If it's solo, don't allow player 2 to use the menu
+  bmi :+
+    lda #0
+    sta key_new_or_repeat+1
+    sta keynew+1
+  :
+
   jsr ClearOAM
+
   ldx #0
   jsr RunMenu
   inx
   jsr RunMenu
 
   ; Allow starting the game or returning to the menu
-  lda keynew
-  and #KEY_START
-  jne InitPuzzleGame
+  lda PlayerReady+0
+  add PlayerReady+1
+  cmp #2
+  bne NotBothReady
+    ldy #0 ; For the OAM index
+    jsr ShowPiecePreviewSprites
+    jsr WaitVblank
+    PositionXY 0, 11, 6
+    jsr PutStringImmediate
+    .byt "Get ready!",0
+    lda #0
+    sta PPUSCROLL
+    sta PPUSCROLL
+
+    lda #0
+  : pha
+    jsr WaitVblank
+    lda #2
+    sta OAM_DMA
+    jsr FamiToneUpdate
+
+    lda #4*5
+    sta OamPtr
+    lda #6*8
+    jsr ReadySprite
+    lda #22*8
+    jsr ReadySprite
+
+    pla
+    add #1
+    sta 255
+    cmp #30
+    bne :+
+      lda #PuzzleSFX::CLEAR
+      ldx #FT_SFX_CH0
+      jsr FamiToneSfxPlay
+    :
+
+    lda 255
+    cmp #60
+    bne :--
+  JumpToInitPuzzleGame:
+    jmp InitPuzzleGame
+  NotBothReady:
+
+  ; In solo mode, player 1 can start the game on their own
+  lda PuzzleVersus
+  bne :+
+    lda PlayerReady
+    bne JumpToInitPuzzleGame
+  :
+
+  jsr FamiToneUpdate
 
   lda keynew
   and #KEY_B
@@ -634,6 +711,13 @@ Loop:
   ; Draw the two cursors
   lda #$41
   sta OAM_TILE+0,y
+  bit PuzzleVersus
+  bmi :+
+    lda #$1
+    sta OAM_TILE+0,y
+    lda #$f0
+    sta OAM_YPOS+4,y
+  :
   lda #$42
   sta OAM_TILE+4,y
 
@@ -641,64 +725,102 @@ Loop:
   sta OAM_ATTR+0,y
   sta OAM_ATTR+4,y
 
-  ; Draw the solo/versus mode select
-  lda #$51
-  sta OAM_TILE+8,y
-  lda #OAM_COLOR_1
-  sta OAM_ATTR+8,y
-  lda #7*8-1
-  sta OAM_YPOS+8,y
-  lda #12*8
-  bit PuzzleVersus
-  bpl :+
-    lda #18*8
-  :
-  sta OAM_XPOS+8,y
-
   ; ---------------------------------------------
   ; Draw the piece preview
+  jsr ShowPiecePreviewSprites
+
+  tya
+  add #4*5
+  sta OamPtr
+
+  lda PlayerReady+0
+  beq Player1NotReady
+    lda #6*8
+    jsr ReadySprite
+  Player1NotReady:
+
+  lda PlayerReady+1
+  beq Player2NotReady
+    lda #22*8
+    jsr ReadySprite
+  Player2NotReady:
+
+  jmp Loop
+
+ShowPiecePreviewSprites:
   ldx PuzzlePieceTheme
   lda PieceThemeTileBases,x
   sta 0
 
   lda #$80 | PuzzleTiles::SINGLE
   ora 0
-  sta OAM_TILE+12+(4*0),y
+  sta OAM_TILE+8+(4*0),y
   lda #$88 | PuzzleTiles::SINGLE
   ora 0
-  sta OAM_TILE+12+(4*1),y
+  sta OAM_TILE+8+(4*1),y
   lda #$90 | PuzzleTiles::SINGLE
   ora 0
-  sta OAM_TILE+12+(4*2),y
+  sta OAM_TILE+8+(4*2),y
 
   lda #OAM_COLOR_3
-  sta OAM_ATTR+12+(4*0),y
-  sta OAM_ATTR+12+(4*1),y
-  sta OAM_ATTR+12+(4*2),y
+  sta OAM_ATTR+8+(4*0),y
+  sta OAM_ATTR+8+(4*1),y
+  sta OAM_ATTR+8+(4*2),y
 
   lda #19*8-1
-  sta OAM_YPOS+12+(4*0),y
-  sta OAM_YPOS+12+(4*1),y
-  sta OAM_YPOS+12+(4*2),y
+  sta OAM_YPOS+8+(4*0),y
+  sta OAM_YPOS+8+(4*1),y
+  sta OAM_YPOS+8+(4*2),y
   lda #15*8
-  sta OAM_XPOS+12+(4*0),y
+  sta OAM_XPOS+8+(4*0),y
   lda #17*8
-  sta OAM_XPOS+12+(4*1),y
+  sta OAM_XPOS+8+(4*1),y
   lda #19*8
-  sta OAM_XPOS+12+(4*2),y
+  sta OAM_XPOS+8+(4*2),y
+  rts
+
+ReadySprite:
+  ldy OamPtr
+  sta OAM_XPOS+(4*0),y
+  add #8
+  sta OAM_XPOS+(4*1),y
+  adc #8
+  sta OAM_XPOS+(4*2),y
+
+  lda #3
+  sta OAM_TILE+(4*0),y
+  lda #4
+  sta OAM_TILE+(4*1),y
+  lda #5
+  sta OAM_TILE+(4*2),y
+
+  lda #OAM_COLOR_0
+  sta OAM_ATTR+(4*0),y
+  sta OAM_ATTR+(4*1),y
+  sta OAM_ATTR+(4*2),y
+
+  lda retraces
+  lsr
+  and #15
+  tax
+  lda BounceTable,x
+  eor #255
+  add #6*8-1
+  sta OAM_YPOS+(4*0),y
+  sta OAM_YPOS+(4*1),y
+  sta OAM_YPOS+(4*2),y
 
   tya
   add #12
   sta OamPtr
-
-  jmp Loop
+  rts
 
 ShiftCursorY:
   asl
   asl
   asl
   asl
-  add #7*8-1
+  add #9*8-1
   rts
 
 RunMenu:
@@ -707,7 +829,7 @@ RunMenu:
   beq :+
     dec CursorY,x
     bpl :+
-      lda #8
+      lda #7
       sta CursorY,x
   :
 
@@ -716,7 +838,7 @@ RunMenu:
   beq :+
     inc CursorY,x
     lda CursorY,x
-    cmp #9
+    cmp #8
     bne :+
       lda #0
       sta CursorY,x
@@ -726,14 +848,6 @@ RunMenu:
   and #KEY_LEFT
   beq @NotLeft
     ldy CursorY,x
-    bne :+
-      ; Solo/Versus
-      lda PuzzleVersus
-      eor #128
-      sta PuzzleVersus
-      jmp @NotLeft
-    :
-    dey
     bne @NotStyleL
       ; Style
       dec PuzzleGimmick
@@ -815,14 +929,6 @@ RunMenu:
   and #KEY_RIGHT
   jeq @NotRight
     ldy CursorY,x
-    bne :+
-      ; Solo/Versus
-      lda PuzzleVersus
-      eor #128
-      sta PuzzleVersus
-      jmp @NotRight
-    :
-    dey
     bne @NotStyleR
       ; Style
       inc PuzzleGimmick
@@ -914,6 +1020,19 @@ RunMenu:
     and #3
     sta PuzzleMusicChoice
   @NotRight:
+
+  lda keynew,x
+  and #KEY_START
+  beq NoStart
+    lda PlayerReady,x
+    eor #1
+    sta PlayerReady,x
+
+    beq NoStart
+    lda #PuzzleSFX::LAND
+    ldx #FT_SFX_CH0
+    jsr FamiToneSfxPlay
+  NoStart:
   rts
 
 PutDecimal:
