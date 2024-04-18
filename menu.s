@@ -638,9 +638,9 @@ Loop:
     ldy #0 ; For the OAM index
     jsr ShowPiecePreviewSprites
     jsr WaitVblank
-    PositionXY 0, 11, 6
+    PositionXY 0, 10, 6
     jsr PutStringImmediate
-    .byt "Get ready!",0
+    .byt "Get ready!!",0
     lda #0
     sta PPUSCROLL
     sta PPUSCROLL
