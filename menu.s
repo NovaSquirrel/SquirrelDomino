@@ -35,6 +35,16 @@
   PositionXY 2, 16-22/2, 16
   jsr PutStringImmediate
   .byt "Press Start to unpause",0
+  ; Mark the pause screen with the playfield palette to avoid black text on black background when using a dark theme
+  lda #$2B
+  sta PPUADDR
+  lda #$C0
+  sta PPUADDR
+  lda #255
+  ldx #64
+: sta PPUDATA
+  dex
+  bne :-
 
   jsr ClearOAM
 
