@@ -66,7 +66,7 @@
   bne NoAutorepeat
   inc KeyRepeatTimer,x
   lda KeyRepeatTimer,x
-  cmp #12
+  cmp #8
   bcc SkipNoAutorepeat
 
   lda retraces
