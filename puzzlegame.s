@@ -89,8 +89,8 @@
   sta PPUADDR
   jsr WritePPURepeated16
 
-  lda #' '
-  jsr ClearNameCustom
+  lda #0
+  jsr ClearName
 
 
   lda PuzzleVersus
@@ -360,7 +360,7 @@ Loop:
     lda keydown
     and #KEY_SELECT
     jne PuzzleGameMenu::Reshow
-    lda #VBLANK_NMI | NT_2800 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
+    lda #VBLANK_NMI | NT_2400 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
     sta PPUCTRL
     lda #BG_ON
     sta PPUMASK

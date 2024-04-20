@@ -214,7 +214,7 @@ denom = 11
 
 ; clear the nametable (including attributes)
 .proc ClearName
-  lda #$3f ; clear tile
+  lda #0 ; clear tile
 Custom:
   ldx #$20
   ldy #$00
@@ -242,7 +242,7 @@ ClearNameCustom = ClearName::Custom
 
 ; clear the second (right) nametable
 .proc ClearNameRight
-  lda #$3f
+  lda #0
 Custom:
   ldx #$24
   ldy #$00

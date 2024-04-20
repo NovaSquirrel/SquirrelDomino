@@ -373,21 +373,19 @@ StateLo:
       ldx TempX
 
       ldy PuzzlePlayfieldBase
-      lda #$10 ;'F'
-      sta PuzzleMap+PUZZLE_HEIGHT*0,y
-      lda #$11 ;'a'
-      sta PuzzleMap+PUZZLE_HEIGHT*1,y
-      lda #$12 ;'i'
+      ; "Oops" message
+      lda #$10
       sta PuzzleMap+PUZZLE_HEIGHT*2,y
-      lda #$13 ;'l'
+      lda #$11
       sta PuzzleMap+PUZZLE_HEIGHT*3,y
-      lda #$14 ;'u'
+      lda #$12
       sta PuzzleMap+PUZZLE_HEIGHT*4,y
-      lda #$15 ;'r'
+      lda #$13
       sta PuzzleMap+PUZZLE_HEIGHT*5,y
-      lda #$16 ;'e'
+      lda #0
+      sta PuzzleMap+PUZZLE_HEIGHT*0,y
+      sta PuzzleMap+PUZZLE_HEIGHT*1,y
       sta PuzzleMap+PUZZLE_HEIGHT*6,y
-      lda #$17 ;'!'
       sta PuzzleMap+PUZZLE_HEIGHT*7,y
 
       lda #60
@@ -1446,23 +1444,22 @@ FixLoop:
       sta PuzzleState,y
 
 
-      ; Display 'Victory!" message
+      ; Display "You win!" message
       ldy PuzzlePlayfieldBase
-      lda #$18 ;'V'
-      sta PuzzleMap+PUZZLE_HEIGHT*0,y
-      lda #$19 ;'i'
+      lda #$14
       sta PuzzleMap+PUZZLE_HEIGHT*1,y
-      lda #$1A ;'c'
+      lda #$15
       sta PuzzleMap+PUZZLE_HEIGHT*2,y
-      lda #$1B ;'t'
+      lda #$16
       sta PuzzleMap+PUZZLE_HEIGHT*3,y
-      lda #$1C ;'o'
+      lda #$17
       sta PuzzleMap+PUZZLE_HEIGHT*4,y
-      lda #$1D ;'r'
+      lda #$18
       sta PuzzleMap+PUZZLE_HEIGHT*5,y
-      lda #$1E ;'y'
+      lda #$19
       sta PuzzleMap+PUZZLE_HEIGHT*6,y
-      lda #$1F ;'!'
+      lda #0
+      sta PuzzleMap+PUZZLE_HEIGHT*0,y
       sta PuzzleMap+PUZZLE_HEIGHT*7,y
 
       lda #60

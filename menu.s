@@ -23,16 +23,14 @@
 .proc TitleScreen
   CursorY = TitleCursorY
 
-  lda #' '
-  jsr ClearNameCustom
-  lda #' '
-  jsr ClearNameRightCustom
+  jsr ClearName
+  jsr ClearNameRight
 
   ; Set up a pause screen on the other tilemap so I can scroll to it at any time
-  PositionXY 2, 16-6/2, 13
+  PositionXY 1, 16-6/2, 13
   jsr PutStringImmediate
   .byt "PAUSED",0
-  PositionXY 2, 16-22/2, 16
+  PositionXY 1, 16-22/2, 16
   jsr PutStringImmediate
   .byt "Press Start to unpause",0
   ; Mark the pause screen with the playfield palette to avoid black text on black background when using a dark theme
@@ -398,8 +396,7 @@ Reshow:
   sta PPUDATA
 
 
-  lda #' '
-  jsr ClearNameCustom
+  jsr ClearName
   jsr ClearOAM
 
 

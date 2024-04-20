@@ -26,7 +26,7 @@
   .byt "NES", $1A
   .byt 1 ; PRG in 16KB units
   .byt 1 ; CHR in 8KB units
-  .byt 0
+  .byt 1 ; Horizontal arrangement
   .byt 0
 .segment "VECTORS"
   .addr nmi, reset, irq
