@@ -44,11 +44,6 @@
   dex
   bne :-
 
-  jsr ClearOAM
-
-  lda #2
-  sta OAM_DMA
-
   PositionXY 0, 6, 4
   jsr PutStringImmediate
   .byt "- Squirrel Domino -",0
@@ -109,9 +104,12 @@
   .byt "Quit",0
   ; ---------------------------------------------
 
+  jsr ClearOAM
   jsr WaitVblank
   lda #BG_ON|OBJ_ON
   sta PPUMASK
+  lda #2
+  sta OAM_DMA
   lda #0
   sta PPUSCROLL
   sta PPUSCROLL
@@ -274,8 +272,6 @@ WaitForExit:
   jsr WaitVblank
   lda #0
   sta PPUMASK
-  lda #2
-  sta OAM_DMA
 
   lda #' '
   jsr ClearNameCustom
@@ -321,6 +317,7 @@ WaitForExit:
   jsr WaitVblank
   lda #BG_ON
   sta PPUMASK
+
   jsr PuzzleReadJoy
   lda keynew
   and #KEY_A|KEY_START
