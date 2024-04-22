@@ -498,18 +498,127 @@ BGThemeExtraColor2:
   rts
 .endproc
 
-; Display a victory message and then exit to menu
+; Display a victory (or failure) message and then exit to menu
 PuzzleFailure:
 .proc PuzzleVictory
   lda PuzzleFallTimer,x
-  beq :+
+  beq NoDelayLeft
     dec PuzzleFallTimer,x
-    rts
-  :
 
+    bne :+
+    lda PuzzleVersus
+    bmi :+
+      ; Timer just turned to zero, and not multiplayer, so display "Continue?" menu
+      ; "Continue?"
+      lda #$53
+      sta PuzzleMap+PUZZLE_HEIGHT*0+7
+      lda #$54
+      sta PuzzleMap+PUZZLE_HEIGHT*1+7
+      lda #$55
+      sta PuzzleMap+PUZZLE_HEIGHT*2+7
+      lda #$56
+      sta PuzzleMap+PUZZLE_HEIGHT*3+7
+      lda #$57
+      sta PuzzleMap+PUZZLE_HEIGHT*4+7
+      lda #$58
+      sta PuzzleMap+PUZZLE_HEIGHT*5+7
+      lda #$59
+      sta PuzzleMap+PUZZLE_HEIGHT*6+7
+
+      ; "Yes"
+      lda #$5a
+      sta PuzzleMap+PUZZLE_HEIGHT*1+8
+      lda #$5b
+      sta PuzzleMap+PUZZLE_HEIGHT*2+8
+      lda #$5c
+      sta PuzzleMap+PUZZLE_HEIGHT*3+8
+
+      ; "No"
+      lda #$5d
+      sta PuzzleMap+PUZZLE_HEIGHT*1+9
+      lda #$5e
+      sta PuzzleMap+PUZZLE_HEIGHT*2+9
+
+      lda #0
+      sta PuzzleY
+      sta PuzzleMap+PUZZLE_HEIGHT*3+9
+      sta PuzzleMap+PUZZLE_HEIGHT*4+9
+      sta PuzzleMap+PUZZLE_HEIGHT*5+9
+      sta PuzzleMap+PUZZLE_HEIGHT*6+9
+      sta PuzzleMap+PUZZLE_HEIGHT*7+9
+      sta PuzzleMap+PUZZLE_HEIGHT*0+8
+      sta PuzzleMap+PUZZLE_HEIGHT*0+9
+      sta PuzzleMap+PUZZLE_HEIGHT*4+8
+      sta PuzzleMap+PUZZLE_HEIGHT*5+8
+      sta PuzzleMap+PUZZLE_HEIGHT*6+8
+      sta PuzzleMap+PUZZLE_HEIGHT*7+8
+      sta PuzzleMap+PUZZLE_HEIGHT*7+7
+
+      inc PuzzleRedraw
+    :
+    rts
+  NoDelayLeft:
+
+  ; If it's multiplayer, just go back to the menu. If it's single player, operate the menu?
+  lda PuzzleVersus
+  bpl :+
+ExitToMenu:
   pla
   pla
   jmp PuzzleGameMenu::Reshow
+:
+
+  lda keynew
+  and #KEY_UP|KEY_DOWN
+  beq :+
+    lda PuzzleY
+    eor #1
+    sta PuzzleY
+  :
+
+  lda PuzzleY
+  asl
+  asl
+  asl
+  adc #14*8-1
+  sta OAM_YPOS+8
+  lda #12*8
+  sta OAM_XPOS+8
+  lda #1
+  sta OAM_TILE+8
+  lda #0
+  sta OAM_ATTR+8
+
+  lda keynew
+  and #KEY_A|KEY_START
+  beq NoA
+    lda PuzzleY
+    bne ExitToMenu
+
+    lda PuzzleState
+    cmp #PuzzleStates::VICTORY
+    bne NotVictory
+    ; Max out at 80
+    lda VirusLevel
+    add #4
+    cmp #80
+    bcc :+
+      lda #80
+    :
+    sta VirusLevel+0
+    NotVictory:
+
+    ldy #PuzzleZeroEnd-PuzzleZeroStart-1
+    lda #0
+  : sta PuzzleZeroStart,y
+    dey
+    bpl :-
+
+    pla
+    pla
+    jmp InitPuzzleGame
+  NoA:
+  rts
 .endproc
 
 ; Y = index of the other player
