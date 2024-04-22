@@ -21,6 +21,7 @@
 ;
 
 NUM_PLAYERS = 2
+SCORE_LENGTH = 6
 
 .segment "ZEROPAGE"
   random0:  .res NUM_PLAYERS
@@ -104,5 +105,9 @@ PuzzleZeroEnd:
   OamPtr:      .res 1
   PlayerDir:   .res 1
   TouchTemp:   .res 10
+
+.segment "BSS"
+  PlayerScore:     .res SCORE_LENGTH ; 1 byte per digit. Only for player 1.
+  PlayerBestScore: .res SCORE_LENGTH
 
   PuzzleMap = $700 ; 128 bytes, 8*16

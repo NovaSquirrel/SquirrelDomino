@@ -34,7 +34,7 @@
   jsr PutStringImmediate
   .byt "Press Start to unpause",0
   ; Mark the pause screen with the playfield palette to avoid black text on black background when using a dark theme
-  lda #$2B
+  lda #$27
   sta PPUADDR
   lda #$C0
   sta PPUADDR
@@ -373,13 +373,6 @@ Reshow:
     jsr FamiToneMusicPlay
   :
 
-  ; Clear the stuff that should be zero'd every new game
-  ldy #PuzzleZeroEnd-PuzzleZeroStart-1
-  lda #0
-: sta PuzzleZeroStart,y
-  dey
-  bpl :-
-
   ; Turn off screen and draw the menu
   jsr WaitVblank
   ldx #0
@@ -683,6 +676,10 @@ Loop:
   ; In solo mode, player 1 can start the game on their own
   lda PuzzleVersus
   bne :+
+    lda #0
+    .repeat ::SCORE_LENGTH, I
+      sta PlayerScore+I
+    .endrep
     lda PlayerReady
     bne JumpToInitPuzzleGame
   :

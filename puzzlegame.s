@@ -42,6 +42,13 @@
 ; -------------------------------------
 
 .proc InitPuzzleGame
+  ; Clear the stuff that should be zero'd every new game
+  ldy #PuzzleZeroEnd-PuzzleZeroStart-1
+  lda #0
+: sta PuzzleZeroStart,y
+  dey
+  bpl :-
+
   jsr PuzzleRandomInit
 
   jsr WaitVblank
@@ -607,12 +614,6 @@ ExitToMenu:
     :
     sta VirusLevel+0
     NotVictory:
-
-    ldy #PuzzleZeroEnd-PuzzleZeroStart-1
-    lda #0
-  : sta PuzzleZeroStart,y
-    dey
-    bpl :-
 
     pla
     pla
