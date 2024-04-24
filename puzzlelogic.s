@@ -340,6 +340,7 @@ StateLo:
   sta PuzzleY,x
   sta PuzzleDir,x
   sta PuzzleMatchesMade,x
+  sta PuzzleVirusesClearedThisMove,x
 
   ; Move into falling pill mode
   inc PuzzleState,x
@@ -1184,7 +1185,7 @@ Horizontal:
   and PuzzleMap+PUZZLE_HEIGHT*1,y
   and PuzzleMap+PUZZLE_HEIGHT*2,y
   and PuzzleMap+PUZZLE_HEIGHT*3,y
-  beq NextHorizontal
+  beq NextHorizontal ; Skip if any of the next three are empty
 
   ; Check for four in a row
   lda Color
@@ -1206,6 +1207,7 @@ Horizontal:
   cmp Color
   bne NextHorizontal
 
+  ; There is a match!
   jsr PrepareGarbage
 
   ; Clear the tiles
@@ -1215,7 +1217,8 @@ Horizontal:
   sta PuzzleRedraw,x
 
   ; Clear out the whole line
-: lda ClearTile
+: jsr AddPointsForVirus
+  lda ClearTile
   sta PuzzleMap,y
   tya
   add #PUZZLE_HEIGHT
@@ -1258,7 +1261,7 @@ Vertical:
   and PuzzleMap+1,y
   and PuzzleMap+2,y
   and PuzzleMap+3,y
-  beq NextVertical
+  beq NextVertical ; Skip if any of the next three are empty
 
   ; Check for four in a row
   lda Color
@@ -1280,6 +1283,7 @@ Vertical:
   cmp Color
   bne NextVertical
 
+  ; There is a match!
   jsr PrepareGarbage
 
   ; Clear the tiles
@@ -1289,7 +1293,8 @@ Vertical:
   sta PuzzleRedraw,x
 
   ; Clear out the whole line
-: lda ClearTile
+: jsr AddPointsForVirus
+  lda ClearTile
   sta PuzzleMap,y
   iny
   inc Row
@@ -1392,6 +1397,69 @@ PrepareGarbage:
   inc PuzzleMatchesMade,x
   ldy TempY
   rts
+
+AddPointsForVirus:
+  cpx #0 ; Player 0 only
+  beq :+
+    rts
+  :
+  lda PuzzleMap,y
+  and #7
+  cmp #PuzzleTiles::VIRUS
+  bne @NotVirus
+    sty TempY
+
+    lda PuzzleSpeed
+    asl
+    asl
+    asl
+    sta 0
+    lda PuzzleVirusesClearedThisMove
+    ora 0
+    tay
+    lda OnesDigits,y
+    adc PlayerScore+0 ; PuzzleSpeed is never high enough to set carry here
+    sta PlayerScore+0
+    lda TensDigits,y
+    adc PlayerScore+1 ; Nor is PlayerScore
+    sta PlayerScore+1
+    lda HundredsDigits,y
+    adc PlayerScore+2 ; Same for PlayerScore+1
+    sta PlayerScore+2
+
+    ;ldx #0 <-- Already known to be 0
+  @FixUpScore:
+    lda PlayerScore,x
+    cmp #10
+    bcc :+
+      sbc #10
+      sta PlayerScore,x
+      inc PlayerScore+1,x
+      bne @FixUpScore ; Retry again just in case
+    :
+    inx
+    cpx #SCORE_LENGTH
+    bne @FixUpScore
+
+    ldy TempY
+    ldx #0 ; Known to be player 0
+    inc PuzzleVirusesClearedThisMove
+    lda PuzzleVirusesClearedThisMove
+    cmp #7
+    bcc @NotVirus
+    lda #7
+    sta PuzzleVirusesClearedThisMove
+  @NotVirus:
+  rts
+HundredsDigits: .byt 0, 0, 0, 0, 0, 0, 0, 1
+                .byt 0, 0, 0, 0, 0, 0, 1, 2
+                .byt 0, 0, 0, 0, 0, 0, 1, 3
+TensDigits:     .byt 0, 0, 0, 0, 1, 3, 6, 2
+                .byt 0, 0, 0, 1, 3, 6, 2, 5
+                .byt 0, 0, 1, 2, 4, 9, 9, 8
+OnesDigits:     .byt 1, 2, 4, 8, 6, 2, 4, 8
+                .byt 2, 4, 8, 6, 2, 4, 8, 6
+                .byt 3, 6, 2, 4, 8, 6, 2, 4
 .endproc
 
 

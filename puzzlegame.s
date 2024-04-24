@@ -130,6 +130,49 @@
   sta PPUDATA
   sta PPUDATA
 
+  ; "Score" text
+  lda #$23
+  sta PPUADDR
+  lda #$0C
+  sta PPUADDR
+  ldx #$4A
+  stx PPUDATA
+  inx
+  stx PPUDATA
+  inx
+  stx PPUDATA
+  inx
+  stx PPUDATA
+
+  .if 0
+  ; "Best" text
+  lda #$23
+  sta PPUADDR
+  lda #$4C
+  sta PPUADDR
+  ldx #$06
+  stx PPUDATA
+  inx
+  stx PPUDATA
+  inx
+  stx PPUDATA
+  inx
+  stx PPUDATA
+  .endif
+
+  ; Set attribute for score
+  lda PuzzleBGTheme
+  and #1
+  beq :+
+    lda #$23
+    sta PPUADDR
+    lda #$f3
+    sta PPUADDR
+    lda #%00001111 ;#%11111111
+    sta PPUDATA
+    sta PPUDATA
+  :
+
   ; Make the playfield border
   ; Top
   PositionXY 0, 11, 5
@@ -310,7 +353,7 @@ Loop:
     jsr PuzzleDrawSolo
     lda #0
     sta PuzzleRedraw
-    jmp :++ ; Skip player 2 to avoid overflowing vblank
+    jmp DontDrawPlayer2 ; Skip player 2 to avoid overflowing vblank
   :
   lda PuzzleRedraw+1
   beq :+
@@ -318,6 +361,41 @@ Loop:
     lda #0
     sta PuzzleRedraw+1
   :
+
+  lda PuzzleVersus
+  beq :+
+    jmp DontDrawPlayer2
+  :
+    ; Current score
+    lda #$23
+    sta PPUADDR
+    lda #$2c
+    sta PPUADDR
+    .repeat 6, I
+      lda PlayerScore+(SCORE_LENGTH-I-1)
+      ora #$40
+      sta PPUDATA
+    .endrep
+    lda #$40
+    sta PPUDATA
+    sta PPUDATA
+
+    .if 0
+    ; Top score
+    lda #$23
+    sta PPUADDR
+    lda #$6c
+    sta PPUADDR
+    .repeat 6, I
+      lda PlayerBestScore+(SCORE_LENGTH-I-1)
+      ora #$40
+      sta PPUDATA
+    .endrep
+    lda #$40
+    sta PPUDATA
+    sta PPUDATA
+    .endif
+  DontDrawPlayer2:
 
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_1000 | OBJ_1000 | VRAM_RIGHT
   sta PPUCTRL
@@ -613,8 +691,16 @@ ExitToMenu:
       lda #80
     :
     sta VirusLevel+0
+    bne WasVictory
     NotVictory:
 
+    ; Reset the score when you retry after failing
+    lda #0
+    .repeat ::SCORE_LENGTH, I
+    sta PlayerScore+I
+    .endrep
+
+    WasVictory:
     pla
     pla
     jmp InitPuzzleGame

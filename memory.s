@@ -44,6 +44,7 @@ PuzzleZeroStart:
   PuzzleSwapX:    .res NUM_PLAYERS
   PuzzleSwapY:    .res NUM_PLAYERS
   PuzzleSwapMode: .res NUM_PLAYERS ; If players are in swap mode or not
+  PuzzleVirusesClearedThisMove: .res NUM_PLAYERS
 
   ; Send garbage
   PuzzleMatchesMade: .res NUM_PLAYERS   ; Matches made between dropping each piece
@@ -107,7 +108,8 @@ PuzzleZeroEnd:
   TouchTemp:   .res 10
 
 .segment "BSS"
-  PlayerScore:     .res SCORE_LENGTH ; 1 byte per digit. Only for player 1.
+  PlayerScore:     .res SCORE_LENGTH+1 ; 1 byte per digit. Only for player 1. Ones digit first.
+  ; There's an extra byte on the end to simplify some code
   PlayerBestScore: .res SCORE_LENGTH
 
   PuzzleMap = $700 ; 128 bytes, 8*16
