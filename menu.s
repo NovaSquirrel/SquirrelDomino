@@ -162,7 +162,7 @@ TitleLoop:
 
   jsr PuzzleReadJoy
   ldx #0
-  jsr KeyRepeat
+  jsr KeyRepeatForMenu
 
   lda key_new_or_repeat
   and #KEY_UP
@@ -631,10 +631,10 @@ Loop:
 
   jsr PuzzleReadJoy
   ldx #0
-  jsr KeyRepeat
+  jsr KeyRepeatForMenu
   jsr RandomByte ; Step player 1's randomizer forward. Player 2's will just be a copy of player 1's
   inx
-  jsr KeyRepeat
+  jsr KeyRepeatForMenu
 
   bit PuzzleVersus ; If it's solo, don't allow player 2 to use the menu
   bmi :+

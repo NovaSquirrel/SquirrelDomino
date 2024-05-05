@@ -57,6 +57,9 @@
 .endproc
 
 .proc KeyRepeat
+  lda #8
+  sta 0
+CustomDelay:
   lda keynew,x
   sta key_new_or_repeat,x
 
@@ -66,7 +69,7 @@
   bne NoAutorepeat
   inc KeyRepeatTimer,x
   lda KeyRepeatTimer,x
-  cmp #8
+  cmp 0
   bcc SkipNoAutorepeat
 
   lda retraces
@@ -86,6 +89,12 @@ NoAutorepeat:
   sta KeyRepeatTimer,x
 SkipNoAutorepeat:
   rts
+.endproc
+
+.proc KeyRepeatForMenu
+  lda #12
+  sta 0
+  bne KeyRepeat::CustomDelay
 .endproc
 
 WaitVblank:
