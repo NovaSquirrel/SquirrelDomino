@@ -464,17 +464,28 @@ Reshow:
 
   ; -----------------------------------
 
-  PositionXY 0, 12, 6
   lda PuzzleVersus
-  bpl :+
-;  bmi :+
-;    jsr PutStringImmediate
-;    .byt " Solo",0
-;    jmp :++
-;  :
+  bmi DisplayVersus
+  ; Solo
+    PositionXY 0, 6, 6
+    jsr PutStringImmediate
+    .byt "Best score: ",0
+    ldx #SCORE_LENGTH-1
+:   lda PlayerBestScore,x
+    ora #'0'
+    sta PPUDATA
+    dex
+    bpl :-
+    lda #'0'
+    sta PPUDATA
+    sta PPUDATA
+
+    jmp DisplayedTopScore
+  DisplayVersus:
+    PositionXY 0, 12, 6
     jsr PutStringImmediate
     .byt "Versus!",0
-  :
+  DisplayedTopScore:
 
   PositionXY 0, 6, 9
   jsr PutStringImmediate

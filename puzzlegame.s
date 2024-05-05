@@ -743,3 +743,29 @@ ExitToMenu:
   ldy #>sounds
   jmp FamiToneSfxInit
 .endproc
+
+.proc CheckAgainstHighScore
+  lda PuzzleGimmick
+  bne Exit
+
+  ldx #SCORE_LENGTH-1
+Loop:
+  lda PlayerBestScore,x
+  cmp PlayerScore,x
+  bcc NewHighScore
+  beq KeepGoing
+  bcs Exit
+KeepGoing:
+  dex
+  bpl Loop
+  rts
+
+NewHighScore:
+  ldx #SCORE_LENGTH-1
+: lda PlayerScore,x
+  sta PlayerBestScore,x
+  dex
+  bpl :-
+Exit:
+  rts
+.endproc

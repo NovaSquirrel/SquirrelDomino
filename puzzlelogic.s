@@ -1441,6 +1441,8 @@ AddPointsForVirus:
     cpx #SCORE_LENGTH
     bne @FixUpScore
 
+    jsr CheckAgainstHighScore
+
     ldy TempY
     ldx #0 ; Known to be player 0
     inc PuzzleVirusesClearedThisMove
