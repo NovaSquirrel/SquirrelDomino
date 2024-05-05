@@ -27,7 +27,8 @@ BlockBackgroundMap = $700
   lda keydown
   and #KEY_SELECT
   beq :+
-    rts
+    lda #0
+    jmp ClearName
   :
 
   lda PuzzleVersus

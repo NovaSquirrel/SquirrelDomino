@@ -44,40 +44,63 @@
   dex
   bne :-
 
-  PositionXY 0, 6, 4
-  jsr PutStringImmediate
-  .byt "- Squirrel Domino -",0
+  ;PositionXY 0, 6, 4
+  ;jsr PutStringImmediate
+  ;.byt "- Squirrel Domino -",0
+
+  PositionXY 0, 8, 4
+  lda #$80
+TitleScreenLoop:
+  ldx #16
+  jsr WriteIncreasing
+  ldx #16
+: bit PPUDATA
+  dex
+  bne :-
+  cmp #0
+  bne TitleScreenLoop
+
+  ; Title screen attributes
+  lda #$23
+  sta PPUADDR
+  lda #$C0
+  sta PPUADDR
+  ldx #32
+  lda #%10101010
+: sta PPUDATA
+  dex
+  bne :-
 
   ; ---------------------------------------------
   ; Menu border
   ; Top
   PositionXY 0, 7, 16
-  lda #$98
+  lda #$18
   sta PPUDATA
-  lda #$99
+  lda #$19
   ldx #16
   jsr WritePPURepeated
-  lda #$9a
+  lda #$1a
   sta PPUDATA
   ; Bottom
   PositionXY 0, 7, 28
-  lda #$9d
+  lda #$1d
   sta PPUDATA
-  lda #$9e
+  lda #$1e
   ldx #16
   jsr WritePPURepeated
-  lda #$9f
+  lda #$1f
   sta PPUDATA
 
   ; Make sides
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_DOWN
   sta PPUCTRL
   PositionXY 0, 7, 17
-  lda #$9b
+  lda #$1b
   ldx #11
   jsr WritePPURepeated
   PositionXY 0, 24, 17
-  lda #$9c
+  lda #$1c
   ldx #11
   jsr WritePPURepeated
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
@@ -200,6 +223,13 @@ OptionVersus:
 
 OptionQuit:
   jmp ($FFFC)
+
+WriteIncreasing:
+: sta PPUDATA
+  add #1
+  dex
+  bne :-
+  rts
 .endproc
 
 .proc OptionHowToPlay
@@ -219,11 +249,11 @@ OptionQuit:
 
   PositionXY 0, 3, 6
   jsr PutStringImmediate
-  .byt "Guide ",$82,$93," to make lines of",0
+  .byt "Guide ",$10,$11," to make lines of",0
 
   PositionXY 0, 3, 8
   jsr PutStringImmediate
-  .byt "4 or more. Clear out all ",$88,0
+  .byt "4 or more. Clear out all ",$12,0
 
   PositionXY 0, 3, 10
   jsr PutStringImmediate
@@ -239,7 +269,7 @@ OptionQuit:
 
   PositionXY 0, 3, 18
   jsr PutStringImmediate
-  .byt "clear all ",$88," first!",0
+  .byt "clear all ",$12," first!",0
 
   PositionXY 0, 5, 22
   jsr PutStringImmediate
@@ -395,32 +425,32 @@ Reshow:
   ; Menu border
   ; Top
   PositionXY 0, 4, 7
-  lda #$98
+  lda #$18
   sta PPUDATA
-  lda #$99
+  lda #$19
   ldx #21
   jsr WritePPURepeated
-  lda #$9a
+  lda #$1a
   sta PPUDATA
   ; Bottom
   PositionXY 0, 4, 25
-  lda #$9d
+  lda #$1d
   sta PPUDATA
-  lda #$9e
+  lda #$1e
   ldx #21
   jsr WritePPURepeated
-  lda #$9f
+  lda #$1f
   sta PPUDATA
 
   ; Make sides
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_DOWN
   sta PPUCTRL
   PositionXY 0, 4, 8
-  lda #$9b
+  lda #$1b
   ldx #17
   jsr WritePPURepeated
   PositionXY 0, 26, 8
-  lda #$9c
+  lda #$1c
   ldx #17
   jsr WritePPURepeated
   lda #VBLANK_NMI | NT_2000 | OBJ_8X8 | BG_0000 | OBJ_1000 | VRAM_RIGHT
@@ -1070,8 +1100,8 @@ PuzzlePieceThemeNames:
   .byt "Squirrel"
 
 PuzzleBGThemeNames:
-  .byt "Paws ",$91,"  "
-  .byt "Paws ",$81,"  "
+  .byt "Paws ",$14,"  "
+  .byt "Paws ",$13,"  "
   .byt "Garden  "
   .byt "Trees   "
   .byt "Stars   "
