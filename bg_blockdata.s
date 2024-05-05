@@ -5,12 +5,14 @@
   .byte $22 ; CloudM
   .byte $24 ; CloudR
   .byte $25 ; Vine
+  .byte $4e ; VineTop
   .byte $2c ; Leaves
   .byte $2e ; TrunkTop
   .byte $3e ; Trunk
   .byte $1a ; PlatformL
   .byte $1b ; PlatformM
   .byte $1b ; PlatformR
+  .byte $1a ; PlatformSingle
   .byte $60 ; GroundL
   .byte $61 ; GroundM
   .byte $61 ; GroundR
@@ -48,6 +50,13 @@
   .byte $bc ; Pawprint4
   .byte $2a ; BigStar
   .byte $27 ; SmallStar
+  .byte $00 ; Spring
+  .byte $1d ; DirtLeft
+  .byte $1e ; Dirt
+  .byte $1e ; DirtRight
+  .byte $1d ; DirtInsideL
+  .byte $1e ; DirtInsideR
+  .byte $f7 ; LineAbove
 .endproc
 
 .proc BlockTopRight
@@ -56,12 +65,14 @@
   .byte $23 ; CloudM
   .byte $00 ; CloudR
   .byte $26 ; Vine
+  .byte $4f ; VineTop
   .byte $2d ; Leaves
   .byte $2f ; TrunkTop
   .byte $3f ; Trunk
   .byte $1b ; PlatformL
   .byte $1b ; PlatformM
   .byte $1c ; PlatformR
+  .byte $1c ; PlatformSingle
   .byte $62 ; GroundL
   .byte $62 ; GroundM
   .byte $63 ; GroundR
@@ -99,6 +110,13 @@
   .byte $bd ; Pawprint4
   .byte $2b ; BigStar
   .byte $00 ; SmallStar
+  .byte $00 ; Spring
+  .byte $1e ; DirtLeft
+  .byte $1e ; Dirt
+  .byte $1f ; DirtRight
+  .byte $1e ; DirtInsideL
+  .byte $1f ; DirtInsideR
+  .byte $f7 ; LineAbove
 .endproc
 
 .proc BlockBottomLeft
@@ -107,15 +125,17 @@
   .byte $31 ; CloudM
   .byte $34 ; CloudR
   .byte $35 ; Vine
+  .byte $35 ; VineTop
   .byte $3c ; Leaves
   .byte $3e ; TrunkTop
   .byte $3e ; Trunk
   .byte $00 ; PlatformL
   .byte $00 ; PlatformM
   .byte $00 ; PlatformR
+  .byte $00 ; PlatformSingle
   .byte $70 ; GroundL
   .byte $71 ; GroundM
-  .byte $72 ; GroundR
+  .byte $71 ; GroundR
   .byte $74 ; WhiteFenceL
   .byte $75 ; WhiteFenceM
   .byte $75 ; WhiteFenceR
@@ -139,7 +159,7 @@
   .byte $fa ; PierMiddle
   .byte $fc ; Crate
   .byte $fe ; Fence
-  .byte $ce ; Grass
+  .byte $de ; Grass
   .byte $d8 ; Flower1
   .byte $d8 ; Flower2
   .byte $d8 ; Flower3
@@ -150,6 +170,13 @@
   .byte $be ; Pawprint4
   .byte $3a ; BigStar
   .byte $00 ; SmallStar
+  .byte $32 ; Spring
+  .byte $1d ; DirtLeft
+  .byte $1e ; Dirt
+  .byte $1e ; DirtRight
+  .byte $1e ; DirtInsideL
+  .byte $1e ; DirtInsideR
+  .byte $00 ; LineAbove
 .endproc
 
 .proc BlockBottomRight
@@ -158,12 +185,14 @@
   .byte $31 ; CloudM
   .byte $00 ; CloudR
   .byte $36 ; Vine
+  .byte $36 ; VineTop
   .byte $3d ; Leaves
   .byte $3f ; TrunkTop
   .byte $3f ; Trunk
   .byte $00 ; PlatformL
   .byte $00 ; PlatformM
   .byte $00 ; PlatformR
+  .byte $00 ; PlatformSingle
   .byte $72 ; GroundL
   .byte $72 ; GroundM
   .byte $73 ; GroundR
@@ -190,7 +219,7 @@
   .byte $fb ; PierMiddle
   .byte $fd ; Crate
   .byte $ff ; Fence
-  .byte $cf ; Grass
+  .byte $df ; Grass
   .byte $d9 ; Flower1
   .byte $d9 ; Flower2
   .byte $d9 ; Flower3
@@ -201,6 +230,13 @@
   .byte $bf ; Pawprint4
   .byte $3b ; BigStar
   .byte $27 ; SmallStar
+  .byte $33 ; Spring
+  .byte $1e ; DirtLeft
+  .byte $1e ; Dirt
+  .byte $1f ; DirtRight
+  .byte $1e ; DirtInsideL
+  .byte $1e ; DirtInsideR
+  .byte $00 ; LineAbove
 .endproc
 
 .proc BlockPalette
@@ -209,12 +245,14 @@
   .byte $00 ; CloudM
   .byte $00 ; CloudR
   .byte $55 ; Vine
+  .byte $55 ; VineTop
   .byte $55 ; Leaves
   .byte $aa ; TrunkTop
   .byte $aa ; Trunk
   .byte $00 ; PlatformL
   .byte $00 ; PlatformM
   .byte $00 ; PlatformR
+  .byte $00 ; PlatformSingle
   .byte $55 ; GroundL
   .byte $55 ; GroundM
   .byte $55 ; GroundR
@@ -252,5 +290,12 @@
   .byte $aa ; Pawprint4
   .byte $aa ; BigStar
   .byte $aa ; SmallStar
+  .byte $aa ; Spring
+  .byte $55 ; DirtLeft
+  .byte $55 ; Dirt
+  .byte $55 ; DirtRight
+  .byte $55 ; DirtInsideL
+  .byte $55 ; DirtInsideR
+  .byte $55 ; LineAbove
 .endproc
 

@@ -115,14 +115,11 @@
   sta PPUADDR
   jsr WritePPURepeated16
 
-  lda #0
-  jsr ClearName
-
+  jsr PuzzleAddBackground
 
   lda PuzzleVersus
   jne DrawVersusPlayfields
   .scope
-  jsr PuzzleAddBackground
 
   lda #0
   sta PuzzleXSpriteOffset
@@ -183,8 +180,11 @@
 
   ; Set attribute for score
   lda PuzzleBGTheme
-  and #1
+  cmp #5
   beq :+
+  cmp #1
+  bne :++
+:
     lda #$23
     sta PPUADDR
     lda #$f3

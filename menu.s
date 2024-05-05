@@ -908,7 +908,7 @@ RunMenu:
     bne @NotBGThemeL
       dec PuzzleBGTheme
       bpl :+
-        lda #3
+        lda #7
         sta PuzzleBGTheme
       :
       jmp @NotLeft
@@ -1002,7 +1002,7 @@ RunMenu:
     bne @NotBGThemeR
       inc PuzzleBGTheme
       lda PuzzleBGTheme
-      cmp #4
+      cmp #8
       bne :+
         lda #0
         sta PuzzleBGTheme
@@ -1074,7 +1074,10 @@ PuzzleBGThemeNames:
   .byt "Paws ",$81,"  "
   .byt "Garden  "
   .byt "Trees   "
-  .byt "Nothing "
+  .byt "Stars   "
+  .byt "Boxes   "
+  .byt "Islands "
+  .byt "Bridges "
 
 PuzzleMusicNames:
   .byt "Mute "
