@@ -389,6 +389,8 @@ Reshow:
   jsr ClearName
   jsr ClearOAM
 
+  ; Reset the palette from whatever the main gameplay did to it
+  jsr ResetPalette
 
   ; Menu border
   ; Top
@@ -576,15 +578,6 @@ Loop:
   inx
   dey
   bne :-
-
-  ; Draw light or dark
-  ldy #$91 ; light
-  lda PuzzleBGTheme
-  lsr
-  bcc :+
-    ldy #$81 ; dark
-  :
-  sty PPUDATA
 
   ; Music names
   PositionXY 0, 13, 23
@@ -1077,10 +1070,11 @@ PuzzlePieceThemeNames:
   .byt "Squirrel"
 
 PuzzleBGThemeNames:
-  .byt "Paws    "
-  .byt "Paws    "
-  .byt "Paws    "
-  .byt "Paws    "
+  .byt "Paws ",$91,"  "
+  .byt "Paws ",$81,"  "
+  .byt "Garden  "
+  .byt "Trees   "
+  .byt "Nothing "
 
 PuzzleMusicNames:
   .byt "Mute "

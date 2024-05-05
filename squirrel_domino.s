@@ -84,6 +84,8 @@ PUZZLE_HEIGHT = 16
 .include "menu.s"
 .include "puzzlegame.s"
 .include "puzzlelogic.s"
+.include "bg_blockdata.s"
+.include "backgrounds.s"
 ; -----------------------------------------------------------------------------
 
 Reset:
@@ -124,6 +126,12 @@ Reset:
   sta PPUCTRL
 
   ; Set PPU palette
+  jsr ResetPalette
+
+  jmp TitleScreen
+.endproc
+
+.proc ResetPalette
   jsr WaitVblank
   lda #$3f
   sta PPUADDR
@@ -135,8 +143,7 @@ Reset:
   inx
   cpx #32
   bne :-
-
-  jmp TitleScreen
+  rts
 .endproc
 
 Palette:

@@ -1,0 +1,221 @@
+alias green_palette 1
+alias gray_palette 0
+alias orange_palette 2
+alias puzzle_palette 3
+
++Empty
+palette 0
+t 0,0 0,0
+t 0,0 0,0
+
++CloudL
+palette gray_palette
+q 0,2
+
++CloudM
+palette gray_palette
+t 2,2 3,2
+t 1,3 1,3
+
++CloudR
+palette gray_palette
+t 4,2 0,0
+t 4,3 0,0
+
++Vine
+palette green_palette
+q 5,2
+
++Leaves
+palette green_palette
+q 12,2
+
++TrunkTop
+palette orange_palette
+q 14,2
+
++Trunk
+palette orange_palette
+t 14,3 15,3
+t 14,3 15,3
+
++PlatformL
+palette gray_palette
+t 10,1 11,1
+t 0,0 0,0
+
++PlatformM
+palette gray_palette
+t 11,1 11,1
+t 0,0 0,0
+
++PlatformR
+palette gray_palette
+t 11,1 12,1
+t 0,0 0,0
+
++GroundL
+palette green_palette
+t 0,6 2,6
+t 0,7 2,7
+
++GroundM
+palette green_palette
+t 1,6 2,6
+t 1,7 2,7
+
++GroundR
+palette green_palette
+t 1,6 3,6
+t 2,7 3,7
+
++WhiteFenceL
+palette gray_palette
+q 4,6
+
++WhiteFenceM
+palette gray_palette
+t 5,6 5,6
+t 5,7 5,7
+
++WhiteFenceR
+palette gray_palette
+q 5,6
+
++Bricks
+palette orange_palette
+q 7,6
+
++Prize
+palette orange_palette
+q 9,6
+
++BigFlower1
+palette orange_palette
+q 11,6
+
++BigFlower2
+palette orange_palette
+q 13,6
+
++BigFlower3
+palette gray_palette
+q 11,6
+
++BigFlower4
+palette gray_palette
+q 13,6
+
++WaterTop
+palette puzzle_palette
+t 15,6 15,6
+t 15,7 15,7
+
++Water
+palette puzzle_palette
+t 15,7 15,7
+t 15,7 15,7
+
++SolidBlock
+palette gray_palette
+q 0,14
+
++Rock
+palette gray_palette
+q 2,14
+
++BridgeTop
+palette orange_palette
+t 0,0 0,0
+t 4,14 5,14
+
++BridgeLBottom
+palette gray_palette
+t 4,15 5,15
+t 0,0 0,0
+
++BridgeMBottom
+palette gray_palette
+t 5,15 5,15
+t 0,0 0,0
+
++BridgeRBottom
+palette gray_palette
+t 5,15 6,15
+t 0,0 0,0
+
++Ladder
+palette orange_palette
+t 6,14 7,14
+t 6,14 7,14
+
++Money
+palette orange_palette
+q 8,14
+
++PierTop
+palette orange_palette
+q 10,14
+
++PierMiddle
+palette orange_palette
+t 10,15 11,15
+t 10,15 11,15
+
++Crate
+palette orange_palette
+q 12,14
+
++Fence
+palette orange_palette
+q 14,14
+
++Grass
+palette green_palette
+t 0,0 0,0
+t 14,12 15,12
+
++Flower1
+palette green_palette
+t 10,13 11,13
+t 8,13 9,13
+
++Flower2
+palette green_palette
+t 12,13 13,13
+t 8,13 9,13
+
++Flower3
+palette orange_palette
+t 10,13 11,13
+t 8,13 9,13
+
++Flower4
+palette orange_palette
+t 12,13 13,13
+t 8,13 9,13
+
++Pawprint1
+palette green_palette
+w 8,11
+
++Pawprint2
+palette green_palette
+w 12,11
+
++Pawprint3
+palette orange_palette
+w 8,11
+
++Pawprint4
+palette orange_palette
+w 12,11
+
++BigStar
+palette orange_palette
+q 10,2
+
++SmallStar
+palette orange_palette
+t 7,2 0,0
+t 0,0 7,2

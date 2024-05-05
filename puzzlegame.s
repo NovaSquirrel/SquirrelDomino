@@ -70,19 +70,38 @@
   stx PPUADDR
   lda #0
   sta PPUADDR
-  lda PuzzleBGTheme
-  and #1
-  tay
-  lda BGThemeBackgroundColors,y
+
+  ldy PuzzleBGTheme
+  ; First palette
+  lda BackgroundBGColor,y
+  sta PPUDATA
+  lda BackgroundColor11,y
+  sta PPUDATA
+  lda BackgroundColor12,y
+  sta PPUDATA
+  lda BackgroundColor13,y
   sta PPUDATA
 
-  ; Do the extra colors too
+  ; Second palette
   stx PPUADDR
   lda #5
   sta PPUADDR
-  lda BGThemeExtraColor1,y
+  lda BackgroundColor21,y
   sta PPUDATA
-  lda BGThemeExtraColor2,y
+  lda BackgroundColor22,y
+  sta PPUDATA
+  lda BackgroundColor23,y
+  sta PPUDATA
+
+  ; Third palette
+  stx PPUADDR
+  lda #9
+  sta PPUADDR
+  lda BackgroundColor31,y
+  sta PPUDATA
+  lda BackgroundColor32,y
+  sta PPUDATA
+  lda BackgroundColor33,y
   sta PPUDATA
 
   ldy PuzzlePieceTheme
@@ -103,6 +122,8 @@
   lda PuzzleVersus
   jne DrawVersusPlayfields
   .scope
+  jsr PuzzleAddBackground
+
   lda #0
   sta PuzzleXSpriteOffset
   lda #<($2000 + 32*6 + 12)
@@ -119,13 +140,13 @@
   sta PPUDATA
   sta PPUDATA
   ldy #3
-: jsr WriteZeroRepeated6
+: jsr SkipAheadSix
   lda #%11111111
   sta PPUDATA
   sta PPUDATA
   dey
   bne :-
-  jsr WriteZeroRepeated6
+  jsr SkipAheadSix
   lda #%00001111
   sta PPUDATA
   sta PPUDATA
@@ -205,7 +226,6 @@
   sta PPUCTRL
 
   .endscope
-  jsr PuzzleAddBackground
   jmp DrewSoloPlayfield
 DrawVersusPlayfields:
   .scope
@@ -493,10 +513,14 @@ stx_stx_sta_sta:
   sta PPUDATA
   rts
 
-WriteZeroRepeated6:
-  lda #0
-  ldx #6
-  jmp WritePPURepeated
+SkipAheadSix:
+  bit PPUDATA
+  bit PPUDATA
+  bit PPUDATA
+  bit PPUDATA
+  bit PPUDATA
+  bit PPUDATA
+  rts
 
 ::WritePieceColors:
   ldy PuzzlePieceColor
@@ -513,13 +537,6 @@ PieceColor2:
   .byt $2a, $28, $37, $29
 PieceColor3:
   .byt $22, $13, $2c, $2c
-
-BGThemeBackgroundColors:
-  .byt $30, $0f
-BGThemeExtraColor1:
-  .byt $3a, $0a
-BGThemeExtraColor2:
-  .byt $3b, $01
 
 ::PieceThemeTileBases:
   .byt $80, $a0, $c0
@@ -725,113 +742,4 @@ ExitToMenu:
   ldx #<sounds
   ldy #>sounds
   jmp FamiToneSfxInit
-.endproc
-
-.proc PuzzleAddBackground
-  lda keydown
-  and #KEY_SELECT
-  beq :+
-    rts
-  :
-
-  lda #$20
-  sta PPUADDR
-  lda #$00
-  sta PPUADDR
-
-
-  jsr AllFour
-  jsr AllFour
-  jsr AllFour
-  jsr AllFour
-  jsr AllFour
-  jsr AllFour
-  jsr AllFour
-  jsr Part1
-  jsr PartEmpty
-  jsr Part1
-  jsr Part2
-  jsr PartEmpty
-  jsr Part2
-
-  ; Attribute table
-  lda #$23
-  sta PPUADDR
-  lda #$c0
-  sta PPUADDR
-
-  ldx #8
-  lda #%01010101
-: sta PPUDATA
-  sta PPUDATA
-  bit PPUDATA
-  bit PPUDATA
-  bit PPUDATA
-  bit PPUDATA
-  sta PPUDATA
-  sta PPUDATA
-  dex
-  bne :-
-
-  rts
-
-AllFour:
-  jsr Part1
-  jsr PartEmpty
-  jsr Part1
-
-  jsr Part2
-  jsr PartEmpty
-  jsr Part2
-
-  jsr Part3
-  jsr PartEmpty
-  jsr Part3
-
-  jsr Part4
-  jsr PartEmpty
-  jmp Part4
-
-Part1:
-  jsr :+
-: lda #$b8
-  sta PPUDATA
-  lda #$b9
-  sta PPUDATA
-  lda PPUDATA
-  lda PPUDATA
-  rts
-Part2:
-  jsr :+
-: lda #$ba
-  sta PPUDATA
-  lda #$bb
-  sta PPUDATA
-  lda PPUDATA
-  lda PPUDATA
-  rts
-Part3:
-  jsr :+
-: lda PPUDATA
-  lda PPUDATA
-  lda #$bc
-  sta PPUDATA
-  lda #$bd
-  sta PPUDATA
-  rts
-Part4:
-  jsr :+
-: lda PPUDATA
-  lda PPUDATA
-  lda #$be
-  sta PPUDATA
-  lda #$bf
-  sta PPUDATA
-  rts
-PartEmpty:
-  ldx #16
-: lda PPUDATA
-  dex
-  bne :-
-  rts
 .endproc
