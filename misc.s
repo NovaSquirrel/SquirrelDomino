@@ -92,7 +92,7 @@ SkipNoAutorepeat:
 .endproc
 
 .proc KeyRepeatForMenu
-  lda #12
+  lda #16
   sta 0
   bne KeyRepeat::CustomDelay
 .endproc
