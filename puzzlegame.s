@@ -775,6 +775,7 @@ ExitToMenu:
 .endproc
 
 .proc CheckAgainstHighScore
+  ; Only happens for player 1, so don't check X=0
   lda PuzzleGimmick
   ora PuzzleVersus
   bne Exit

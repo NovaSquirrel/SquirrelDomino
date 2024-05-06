@@ -1161,12 +1161,12 @@ PuzzleGridReadFirst:
   lda PuzzleY,x
   sta 1
 .proc PuzzleGridRead
-  lda 0
+  lda 0 ; Column
   asl
   asl
   asl
   asl
-  ora 1
+  ora 1 ; Row
   ora PuzzlePlayfieldBase
   tay
   lda PuzzleMap,y
@@ -1179,6 +1179,7 @@ Row = 1
 Column = 0
 Color = 2
 ClearTile = 3
+PointsTemp = 4
   lda #0
   sta Row
   sta Column
@@ -1416,9 +1417,9 @@ AddPointsForVirus:
     asl
     asl
     asl
-    sta 0
+    sta PointsTemp
     lda PuzzleVirusesClearedThisMove
-    ora 0
+    ora PointsTemp
     tay
     lda OnesDigits,y
     adc PlayerScore+0 ; PuzzleSpeed is never high enough to set carry here
