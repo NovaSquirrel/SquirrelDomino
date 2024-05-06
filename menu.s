@@ -217,6 +217,11 @@ OptionSolo:
   sta PuzzleVersus
   jmp PuzzleGameMenu
 OptionVersus:
+  lda #'0'
+  sta PlayerWinsOnes+0
+  sta PlayerWinsOnes+1
+  sta PlayerWinsTens+0
+  sta PlayerWinsTens+1
   lda #128
   sta PuzzleVersus
   jmp PuzzleGameMenu
@@ -482,6 +487,21 @@ Reshow:
 
     jmp DisplayedTopScore
   DisplayVersus:
+    PositionXY 0, 6, 26
+    lda PlayerWinsTens+0
+    sta PPUDATA
+    lda PlayerWinsOnes+0
+    sta PPUDATA
+    PositionXY 0, 23, 26
+    lda PlayerWinsTens+1
+    sta PPUDATA
+    lda PlayerWinsOnes+1
+    sta PPUDATA
+
+    PositionXY 0, 11, 26
+    jsr PutStringImmediate
+    .byt "< score >",0
+
     PositionXY 0, 12, 6
     jsr PutStringImmediate
     .byt "Versus!",0

@@ -395,6 +395,9 @@ StateLo:
       lda #PuzzleStates::FAILURE
       sta PuzzleState,x
       inc PuzzleRedraw,x
+
+      jsr PuzzleOtherPlayer
+      jsr ScorePointForPlayerY
   NotFailure:
   rts
 .endproc
@@ -1502,6 +1505,7 @@ FixLoop:
       lda PuzzleState,y
       cmp #PuzzleStates::VICTORY
       beq NoVictory
+
 ;      lda #PuzzleSFX::WIN
 ;      jsr PuzzlePlaySFX
       stx TempX
@@ -1539,6 +1543,10 @@ FixLoop:
       lda #PuzzleStates::VICTORY
       sta PuzzleState,x
       inc PuzzleRedraw,x
+
+      txa
+      tay
+      jsr ScorePointForPlayerY
     NoVictory:
     rts
   :
@@ -2016,5 +2024,29 @@ CalculateTileNum:
   ora #$80 | PuzzleTiles::VIRUS
   ora PuzzleTileBase
   sta TileNum
+  rts
+.endproc
+
+.proc ScorePointForPlayerY
+  lda SomeoneWonOrLost
+  bne Exit
+  inc SomeoneWonOrLost
+
+  lda PlayerWinsOnes,y
+  add #1
+  sta PlayerWinsOnes,y
+  cmp #'0'+10
+  bne :+
+    lda #'0'
+    sta PlayerWinsOnes,y
+    lda PlayerWinsTens,y
+    add #1
+    sta PlayerWinsTens,y
+    cmp #'0'+10
+    bne :+
+     lda #'9'
+     sta PlayerWinsTens,y
+  :
+Exit:
   rts
 .endproc

@@ -54,6 +54,7 @@ PuzzleZeroStart:
   PuzzleGarbageCount: .res NUM_PLAYERS
   PuzzleGarbageColor: .res NUM_PLAYERS*4
   LockoutSoftDrop:    .res NUM_PLAYERS ; Don't allow soft drop until you press down again
+  SomeoneWonOrLost:   .res 1
 PuzzleZeroEnd:
 
   PuzzleX:          .res NUM_PLAYERS
@@ -111,5 +112,7 @@ PuzzleZeroEnd:
   PlayerScore:     .res SCORE_LENGTH+1 ; 1 byte per digit. Only for player 1. Ones digit first.
   ; There's an extra byte on the end to simplify some code
   PlayerBestScore: .res SCORE_LENGTH+1
+  PlayerWinsOnes: .res NUM_PLAYERS
+  PlayerWinsTens: .res NUM_PLAYERS
 
   PuzzleMap = $700 ; 128 bytes, 8*16

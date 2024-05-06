@@ -604,60 +604,90 @@ PieceColor3:
 PuzzleFailure:
 .proc PuzzleVictory
   lda PuzzleFallTimer,x
-  beq NoDelayLeft
+  jeq NoDelayLeft
     dec PuzzleFallTimer,x
 
-    bne :+
+    beq :+
+JumpToTimerNotDone:
+      jmp TimerNotDone
+    :
     lda PuzzleVersus
-    bmi :+
+    bmi JumpToTimerNotDone
+      ; Just clear the screen
+      ldy #127
+    ClearScreenLoop:
+      tya
+      and #15
+      beq :+
+        lda #0
+        sta PuzzleMap,y
+      :
+      dey
+      bne ClearScreenLoop
+
       ; Timer just turned to zero, and not multiplayer, so display "Continue?" menu
       ; "Continue?"
-      lda #$53
-      sta PuzzleMap+PUZZLE_HEIGHT*0+7
-      lda #$54
-      sta PuzzleMap+PUZZLE_HEIGHT*1+7
-      lda #$55
-      sta PuzzleMap+PUZZLE_HEIGHT*2+7
-      lda #$56
-      sta PuzzleMap+PUZZLE_HEIGHT*3+7
-      lda #$57
-      sta PuzzleMap+PUZZLE_HEIGHT*4+7
-      lda #$58
-      sta PuzzleMap+PUZZLE_HEIGHT*5+7
-      lda #$59
-      sta PuzzleMap+PUZZLE_HEIGHT*6+7
+      ldy #$53
+      sty PuzzleMap+PUZZLE_HEIGHT*0+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*1+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*2+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*3+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*4+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*5+7
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*6+7
 
       ; "Yes"
-      lda #$5a
-      sta PuzzleMap+PUZZLE_HEIGHT*1+8
-      lda #$5b
-      sta PuzzleMap+PUZZLE_HEIGHT*2+8
-      lda #$5c
-      sta PuzzleMap+PUZZLE_HEIGHT*3+8
+      ldy #$5a
+      sty PuzzleMap+PUZZLE_HEIGHT*1+8
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*2+8
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*3+8
 
       ; "No"
-      lda #$5d
-      sta PuzzleMap+PUZZLE_HEIGHT*1+9
-      lda #$5e
-      sta PuzzleMap+PUZZLE_HEIGHT*2+9
+      ldy #$5d
+      sty PuzzleMap+PUZZLE_HEIGHT*1+9
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*2+9
 
       lda #0
       sta PuzzleY
-      sta PuzzleMap+PUZZLE_HEIGHT*3+9
-      sta PuzzleMap+PUZZLE_HEIGHT*4+9
-      sta PuzzleMap+PUZZLE_HEIGHT*5+9
-      sta PuzzleMap+PUZZLE_HEIGHT*6+9
-      sta PuzzleMap+PUZZLE_HEIGHT*7+9
-      sta PuzzleMap+PUZZLE_HEIGHT*0+8
-      sta PuzzleMap+PUZZLE_HEIGHT*0+9
-      sta PuzzleMap+PUZZLE_HEIGHT*4+8
-      sta PuzzleMap+PUZZLE_HEIGHT*5+8
-      sta PuzzleMap+PUZZLE_HEIGHT*6+8
-      sta PuzzleMap+PUZZLE_HEIGHT*7+8
-      sta PuzzleMap+PUZZLE_HEIGHT*7+7
+
+      lda PuzzleGimmick
+      bne UsingGimmick
+      ldx #0
+      ldy #SCORE_LENGTH-1
+    : lda PlayerBestScore,y
+      ora #$40
+      sta PuzzleMap+PUZZLE_HEIGHT-1,x
+      txa
+      add #PUZZLE_HEIGHT
+      tax
+      dey
+      bpl :-
+      lda #$40
+      sta PuzzleMap+PUZZLE_HEIGHT*7-1
+      sta PuzzleMap+PUZZLE_HEIGHT*8-1
+
+      ; "Best"
+      ldy #6
+      sty PuzzleMap+PUZZLE_HEIGHT*1-2
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*2-2
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*3-2
+      iny
+      sty PuzzleMap+PUZZLE_HEIGHT*4-2
+    UsingGimmick:
 
       inc PuzzleRedraw
-    :
+    TimerNotDone:
     rts
   NoDelayLeft:
 
@@ -746,6 +776,7 @@ ExitToMenu:
 
 .proc CheckAgainstHighScore
   lda PuzzleGimmick
+  ora PuzzleVersus
   bne Exit
 
   ldx #SCORE_LENGTH-1
