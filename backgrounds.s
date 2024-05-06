@@ -743,7 +743,7 @@ VersusStarsMap:
   bg_r Block::Grass, 0, 12, 5, 1
   bg_r Block::Grass, 11, 12, 5, 1
   bg_1 Block::Flower2, 1, 12
-  bg_1 Block::Flower2, 2, 12
+  bg_1 Block::Flower2, 3, 12
   bg_1 Block::Flower2, 12, 12
   bg_1 Block::Flower2, 14, 12
   bg_r Block::SmallStar, 7, 12, 2, 1
